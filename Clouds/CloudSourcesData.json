@@ -1,0 +1,136 @@
+{
+    "CloudSources" : [
+        {
+            "name": "Hobart-Australia",
+            "url": "https://hccapps.hobartcity.com.au/webcams/platform",
+            "crop_coords": "(0,250,3250,1500)",
+            "time_list": ["19:30", "23:00", "05:00", "09:30"]
+        },
+        {
+            "name": "Bauang-Philippines",
+            "url": "https://admin.meteobridge.com/cam/57287b66aef052a0bb33df9e62f6ff05/camplus.jpg",
+            "crop_coords": "(0,50,999,500)",
+            "time_list": ["23:00", "20:00", "15:00", "10:30"]
+        },
+        {
+            "name": "Stavrakia-Crete",
+            "url": "http://penteli.meteo.gr/stations/stavrakia/webcam.jpg",
+            "crop_coords": "(0,100,1280,720)",
+            "time_list": ["06:00", "11:00", "13:00", "17:00"]
+        },
+        {
+            "name": "Kalahari-Namibia",
+            "url": "https://weather.namsearch.com/anibcam/images/GondwanaKalahariAnib.jpg",
+            "crop_coords": "(0,100,1920,950)",
+            "time_list": ["05:00", "10:00", "15:00", "18:00"]
+        },
+        {
+            "name": "Regina-Canada",
+            "url": "http://users.accesscomm.ca/saskweather/webcam/webcam32.jpg",
+            "crop_coords": "(0,0,968,500)",
+            "time_list": ["15:00", "18:00", "21:00", "00:00"]
+        },
+        {
+            "name": "MountShasta-USA",
+            "url": "https://sc.snowcrest.net/images/camera/snowcam-high000M.jpg",
+            "crop_coords": "(0,50,1280,720)",
+            "time_list": ["15:00", "20:00", "23:00", "01:30"]
+        },
+        {
+            "name": "BodegaBay-USA",
+            "url": "https://boonproducts.ucdavis.edu/dyn/Netcam/latest.jpg",
+            "crop_coords": "(0,20,1296,960)",
+            "time_list": ["15:00", "20:00", "23:00", "02:00"]
+        },
+        {
+            "name": "AliceSprings-Australia",
+            "url": "http://www.alice.skycam.net.au/CAM1/image.jpg",
+            "crop_coords": "(0,200,1800,900)",
+            "time_list": ["21:00", "01:00", "07:00", "10:00"]
+        },
+        {
+            "name": "NynganSE-Australia",
+            "url": "https://airportweathercams.com/YNYN/showimagecamera1.php",
+            "crop_coords": "(0,150,2560,1400)",
+            "time_list": ["19:30", "00:00", "05:00", "09:00"]
+        },
+        {
+            "name": "NynganNW-Australia",
+            "url": "https://airportweathercams.com/YNYN/showimagecamera2.php",
+            "crop_coords": "(0,150,2560,1400)",
+            "time_list": ["19:30", "00:00", "05:00", "09:00"]
+        },
+        {
+            "name": "Geraldton-Australia",
+            "url": "https://mywebcams.com.au/WA/Geraldton.php",
+            "crop_coords": "(0,50,1920,900)",
+            "time_list": ["22:00", "02:00", "06:00", "11:00"]
+        },
+        {
+            "name": "Alexandra-NZ",
+            "url": "https://myairportcams.com/Alexandra/current3.jpg",
+            "crop_coords": "(0,100,2560,1920)",
+            "time_list": ["18:00", "00:00", "04:00", "08:00"]
+        },
+        {
+            "name": "Guaruja-Brazil",
+            "url": "https://www.centraldotempo.com.br/data/robot/robot3/robot3.jpg",
+            "crop_coords": "(0,0,1280,650)",
+            "time_list": ["09:30", "12:00", "16:00", "22:00"]
+        },
+        {
+            "name": "Guadalajara-Mexico",
+            "url": "http://www.webcamsdemexico.net/guadalajara1/live.jpg",
+            "crop_coords": "(0,60,800,600)",
+            "time_list": ["13:30", "17:00", "22:00", "01:00"]
+        },
+        {
+            "name": "RevolutionMonument-Mexico",
+            "url": "https://webcamsdemexico.net/mexicodf7/live.jpg",
+            "crop_coords": "(0,100, 800, 600)",
+            "time_list": ["13:00", "17:00", "22:00", "01:00"]
+        },
+        {
+            "name": "Victoria-Malta",
+            "url": "http://content.meteobridge.com/cam/56e447b3ef709bce2e6bee72b922b61a/camplus.jpg",
+            "crop_coords": "(0,30,852,450)",
+            "time_list": ["06:00", "10:00", "14:00", "16:30"]
+        },
+        {
+            "name": "Sliema-Malta",
+            "url": "http://www.maltaweather.com/stream.jpg",
+            "crop_coords": "(0,32,854,480)",
+            "time_list": ["06:00", "10:00", "14:00", "16:30"]
+        },
+        {
+            "name": "Alicante-Spain",
+            "url": "https://www.runekvinge.no/alicante/cam1.jpg",
+            "crop_coords": "(0,40,1920,1080)",
+            "time_list": ["07:00", "12:00", "15:00", "18:00"]
+        },
+        {
+            "name": "Bulandshofoi-Iceland",
+            "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/bulandshofdi_1.jpg",
+            "crop_coords": "(0,30,640,450)",
+            "time_list": ["09:00", "12:00", "15:00", "18:00"]
+        },
+        {
+            "name": "Siglufjaroarvegur-Iceland",
+            "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/siglufjardarvegur_3.jpg",
+            "crop_coords": "(0,30,640,450)",
+            "time_list": ["09:00", "12:00", "15:00", "18:00"]
+        },
+        {
+            "name": "Bolungarvikurgong-Iceland",
+            "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/bolungarvikurgong_1.jpg",
+            "crop_coords": "(0,30,640,450)",
+            "time_list": ["09:00", "12:00", "15:00", "18:00"]
+        },
+        {
+            "name": "Blikdalsa-Iceland",
+            "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/blikdalsa_1.jpg",
+            "crop_coords": "(0,30,640,450)",
+            "time_list": ["09:00", "12:00", "15:00", "18:00"]
+        }
+    ]    
+}

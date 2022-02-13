@@ -1,0 +1,5 @@
+__pycache__
+images/*
+logs/*
+*.key
+*.pub
