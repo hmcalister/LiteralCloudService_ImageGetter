@@ -2,15 +2,13 @@ import logging
 import datetime
 import time
 logging.Formatter.converter = time.gmtime
-logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}.log", 
+logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-wget-testing.log", 
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-import shutil
 import json
 from typing import List
-from time import sleep
 from Clouds.CloudSource import CloudSource, get_cloud_sources, archive_images
 
 
@@ -75,7 +73,7 @@ def test_time_wget():
             logging.info(f"SLEEPING FOR {delta.total_seconds()}s")
             logging.info(f"SLEEP FINISH SCHEDULED FOR (LOCAL): {datetime.datetime.now()+delta}")
             logging.info(f"SLEEP FINISH SCHEDULED FOR (UTC): {datetime.datetime.utcnow()+delta}")
-            sleep(delta.total_seconds())
+            time.sleep(delta.total_seconds())
         else:
             logging.info(f"NO SLEEP NEEDED")
         logging.info(f"GET {str(source)}")
