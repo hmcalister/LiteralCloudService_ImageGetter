@@ -1,5 +1,6 @@
 __pycache__
 images/*
+images_backup/*
 logs/*
 *.key
 *.pub
