@@ -276,7 +276,7 @@ def archive_images(backup_dir=None):
         logging.debug(f"{e=}")
         logging.debug(f"{type(e)=}")
 
-def get_from_all_sources():
+def wget_sources():
     """
     For all of the cloud sources in the cloud source json file, get the image from that source for this day.
     This is currently very static, intended to get the job done quickly. In future this may be parameterized.

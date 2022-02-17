@@ -26,51 +26,27 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from typing import Tuple
+<pre><code class="python">import datetime
+import time
 import urllib
 import logging
 import wget
-from PIL import Image, UnidentifiedImageError
+import json
 import os
 import ssl
+import shutil
+from ast import literal_eval
+from typing import List, Tuple
+from urllib.error import ContentTooShortError
+from PIL import Image, UnidentifiedImageError
 
 # To get around dodgy webcams with expired SSL certificates
 ssl._create_default_https_context = ssl._create_unverified_context
-logging.basicConfig(level=logging.INFO)
-
-def delete_file(file_path:str)-&gt;bool:
-    &#34;&#34;&#34;
-    Delete a file located at file_path, handelling errors.
-    ---
-    Params
-    file_path : str
-        The path to the file to remove
-    ---
-    Returns : Bool
-        True if the file no longer exists after method call
-        False otherwise
-    &#34;&#34;&#34;
-
-    if os.path.exists(file_path):
-        logging.info(f&#34;REMOVING FILE {file_path}&#34;)
-        try:
-            os.remove(file_path)
-        except IsADirectoryError as e:
-            logging.info(f&#34;ERROR: {file_path} is a directory&#34;)
-            logging.debug(f&#34;{e=}&#34;)
-            logging.debug(f&#34;{type(e)=}&#34;)
-            return False
-        except OSError as e:
-            logging.info(f&#34;ERROR: {file_path} CANNOT BE REMOVED&#34;)
-            logging.debug(f&#34;{e=}&#34;)
-            logging.debug(f&#34;{type(e)=}&#34;)
-            return False
-        logging.info(f&#34;FILE REMOVED&#34;)
-        return True
-    else:
-        logging.info(f&#34;{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED&#34;)
-        return True
-
+logging.Formatter.converter = time.gmtime
+logging.basicConfig(filename=f&#34;logs/{str(datetime.datetime.utcnow().date())}-cloud-sources.log&#34;, 
+    format=&#39;%(asctime)s %(levelname)-8s %(message)s&#39;,
+    level=logging.INFO,
+    datefmt=&#39;%Y-%m-%d %H:%M:%S&#39;)
 
 class CloudSource:
     &#34;&#34;&#34;
@@ -119,9 +95,9 @@ class CloudSource:
             A debug string of this objects attributes
         &#34;&#34;&#34;
 
-        return f&#34;CloudSource: {self.name}\n\tURL: {self.url}\n\tcrop_coords: {self.crop_coords}\n\tTime: {self.time}&#34;
+        return f&#34;CloudSource: {self.name}, URL: {self.url}, crop_coords: {self.crop_coords}, Time: {self.time}&#34;
 
-    def get_image(self, image_name:str = None, directory:str=&#34;images/&#34;) -&gt; bool:
+    def get_image(self, image_name:str = None, directory:str=&#34;images/current_downloads&#34;) -&gt; bool:
         &#34;&#34;&#34;
         Get the most recent image from this cloud source, crop it, and save it
         ---
@@ -134,17 +110,16 @@ class CloudSource:
             True if image is successfully downloaded and cropped, false otherwise
         &#34;&#34;&#34;
 
-        logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
-        if image_name == None:
-            image_name = f&#34;{directory}{str(self)}.png&#34;
-
-        logging.debug(f&#34;{image_name=}&#34;)
-        logging.debug(f&#34;{self.url=}&#34;)
-
-        delete_file(image_name)
-
         try:
+            logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
+            if image_name == None:
+                image_name = f&#34;{directory}{str(self)}.png&#34;
+
+            logging.debug(f&#34;{image_name=}&#34;)
+            logging.debug(f&#34;{self.url=}&#34;)
+            delete_file(image_name)
             wget.download(self.url, image_name)
+            logging.info(&#34;DOWNLOAD COMPLETE&#34;)
         except ValueError as e:
             logging.info(f&#34;ERROR: ValueError found during download of {self.name}! URL form not recognized&#34;)
             delete_file(image_name)
@@ -157,38 +132,228 @@ class CloudSource:
             logging.debug(f&#34;{e=}&#34;)
             logging.debug(f&#34;{type(e)=}&#34;)
             return False
+        except ContentTooShortError as e:
+            logging.info(f&#34;ERROR: Content too short during download of {self.name}! Check URL and retry&#34;)
+            delete_file(image_name)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+        except Exception as e:
+            logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+            delete_file(image_name)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+
         try:
+            logging.info(&#34;CROPPING IMAGE&#34;)
+            logging.debug(f&#34;Opening {image_name} with PIL&#34;)
             im = Image.open(image_name)
+            logging.debug(f&#34;Source Dimensions: {im.size}&#34;)
+            logging.debug(f&#34;Target Dimensions: {self.crop_coords=}&#34;)
+            cropped_im = im.crop(self.crop_coords)
+            logging.debug(&#34;Image cropped, saving image...&#34;)
+            cropped_im.save(image_name)
             im.close()
+            cropped_im.close()
+            logging.info(&#34;IMAGE SAVED&#34;)
         except UnidentifiedImageError as e: 
             logging.info(f&#34;ERROR: Unidentified image from source {self.name}! URL may be broken&#34;)
             delete_file(image_name)
             logging.debug(f&#34;{e=}&#34;)
             logging.debug(f&#34;{type(e)=}&#34;)
             return False
-
-        logging.info(&#34;DOWNLOAD COMPLETE&#34;)
-        logging.info(&#34;CROPPING IMAGE&#34;)
-        logging.debug(f&#34;Opening {image_name} with PIL&#34;)
-        im = Image.open(image_name)
-        logging.debug(f&#34;Source Dimensions: {im.size}&#34;)
-        logging.debug(f&#34;Target Dimensions: {self.crop_coords=}&#34;)
-        cropped_im = im.crop(self.crop_coords)
-        logging.debug(&#34;Image cropped, saving image...&#34;)
-        try:
-            cropped_im.save(image_name)
+        except FileNotFoundError as e:
+            logging.info(f&#34;ERROR: File {self.name} not found! Download may have failed&#34;)
+            delete_file(image_name)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
         except SystemError as e:
             logging.info(f&#34;ERROR: System error during save of {self.name}! Check config and retry&#34;)
             delete_file(image_name)
             logging.debug(f&#34;{e=}&#34;)
             logging.debug(f&#34;{type(e)=}&#34;)
             return False
-        logging.info(&#34;IMAGE SAVED&#34;)
-
+        except Exception as e:
+            logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+            delete_file(image_name)
+            logging.info(f&#34;{e=}&#34;)
+            logging.info(f&#34;{type(e)=}&#34;)
+            return False           
         return True
 
-if __name__ == &#34;__main__&#34;:
-    logging.getLogger().setLevel(level=logging.DEBUG)</code></pre>
+    def set_target_time(self, now:datetime.datetime) -&gt; datetime.datetime:
+        &#34;&#34;&#34;
+        Given a time representing now (conventionally in UTC but depending on your sources configuration),
+        return a datetime object that represents the time of this sources trigger.
+        Also sets this object as a datafield of this CloudSource object
+
+        ---
+
+        Params
+        now : datetime.datetime
+            A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)
+        
+        ---
+        
+        Returns : datetime.datetime
+            A datetime object representing the time at which this source should be triggered      
+        &#34;&#34;&#34;
+
+        # Get hour and minute of this source
+        hour = int(self.time.split(&#34;:&#34;)[0])
+        minute = int(self.time.split(&#34;:&#34;)[1])
+        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0)
+        # If our target time is in the past, we must make the target time in the future by adding a day
+        if self.target_time&lt;now:
+            self.target_time += datetime.timedelta(days=1)
+        return self.target_time
+
+def get_cloud_sources(clouds_data_file:str = &#34;Clouds/CloudSourcesData.json&#34;) -&gt; List[CloudSource]:
+    &#34;&#34;&#34;
+    Get all cloud sources specified in a data file.
+    See the readme for specification
+    ---
+    Params
+    clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
+        The json file to get the cloud source from
+    ---
+    Returns : List[CloudSource]
+        A list of all of the cloud sources specified
+    &#34;&#34;&#34;
+    logging.info(&#34;LOAD DATA&#34;)
+    data_file = open(clouds_data_file)
+    # cloud_data = data_file.readlines()
+    cloud_data = json.load(data_file)
+    data_file.close()
+    logging.info(cloud_data)
+    logging.info(&#34;DATA LOADED&#34;)
+    logging.info(&#34;-&#34;*80)
+
+    cloud_sources = []
+    logging.info(&#34;LOAD SOURCES&#34;)
+    for cloud_source_data in cloud_data[&#34;CloudSources&#34;]:
+        name = cloud_source_data[&#34;name&#34;]
+        url = cloud_source_data[&#34;url&#34;]
+        crop_coords = cloud_source_data[&#34;crop_coords&#34;]
+        for time in cloud_source_data[&#34;time_list&#34;]:
+            logging.info(f&#34;{name}, {url}, {crop_coords}, {time}&#34;)
+            cloud_source = CloudSource(name, url, literal_eval(crop_coords), time)
+            logging.debug(cloud_source)
+            cloud_sources.append(cloud_source)
+
+    logging.info(&#34;SOURCES LOADED&#34;)
+
+    return cloud_sources
+
+def delete_file(file_path:str)-&gt;bool:
+    &#34;&#34;&#34;
+    Delete a file located at file_path, handelling errors.
+    ---
+    Params
+    file_path : str
+        The path to the file to remove
+    ---
+    Returns : Bool
+        True if the file no longer exists after method call
+        False otherwise
+    &#34;&#34;&#34;
+
+    if os.path.exists(file_path):
+        logging.debug(f&#34;REMOVING FILE {file_path}&#34;)
+        try:
+            os.remove(file_path)
+        except IsADirectoryError as e:
+            logging.info(f&#34;ERROR: {file_path} is a directory&#34;)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+        except OSError as e:
+            logging.info(f&#34;ERROR: {file_path} CANNOT BE REMOVED&#34;)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+        logging.info(f&#34;FILE REMOVED&#34;)
+        return True
+    else:
+        logging.debug(f&#34;{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED&#34;)
+        return True
+
+def archive_images(backup_dir=None):
+    &#34;&#34;&#34;
+    Moves the images directory to a backup directory.
+    Intended to be run after collecting from all sources processing.
+    In future may add option for compression as well
+    ---
+    Params:
+    backup_dir : str, optional (defaults to None)
+        The path to move the images to
+        If None, defaults to images/images_archive/{datetime.datetime.now().date()}
+    &#34;&#34;&#34;
+    
+    if backup_dir==None:
+        backup_dir=f&#34;images/images_archive/{datetime.datetime.utcnow().date()}&#34;
+
+    try:
+        os.makedirs(backup_dir)
+        for file_name in os.listdir(&#34;images&#34;):
+            shutil.move(os.path.join(&#34;images&#34;, file_name), backup_dir)
+    except Exception as e:
+        logging.info(&#34;ERROR: Failed to move images to backup folder!&#34;)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+
+def wget_sources():
+    &#34;&#34;&#34;
+    For all of the cloud sources in the cloud source json file, get the image from that source for this day.
+    This is currently very static, intended to get the job done quickly. In future this may be parameterized.
+    &#34;&#34;&#34;
+
+    cloud_sources:List[CloudSource] = get_cloud_sources()
+    logging.debug(cloud_sources)
+    logging.info(&#34;-&#34;*80)
+
+    logging.info(&#34;GET TARGET TIMES&#34;)
+    for source in cloud_sources:
+        now = datetime.datetime.utcnow()
+        logging.debug(f&#34;{now=}&#34;)
+        logging.debug(f&#34;{source=}&#34;)
+        source.set_target_time(now)
+
+    logging.info(&#34;TARGET TIMES CREATED&#34;)
+    logging.info(&#34;-&#34;*80)
+    logging.info(&#34;SORTING SOURCES&#34;)
+    cloud_sources.sort(key = lambda x:x.target_time)
+    logging.info(&#34;SOURCES SORTED&#34;)
+    for source in cloud_sources:
+        logging.info(f&#34;{str(source):&lt;50}{source.target_time}&#34;)
+
+    logging.info(&#34;-&#34;*80)
+
+    logging.info(&#34;START GET FROM SOURCES&#34;)
+    for source in cloud_sources:
+        logging.info(f&#34;{source=}&#34;)
+        logging.info(f&#34;CURRENT TIME (LOCAL): {datetime.datetime.now()}&#34;)
+        logging.info(f&#34;CURRENT TIME (UTC): {datetime.datetime.utcnow()}&#34;)
+        now = datetime.datetime.utcnow()
+        delta = source.target_time - now
+        if delta.total_seconds() &gt; 0:
+            logging.info(f&#34;SLEEPING FOR {delta.total_seconds()}s&#34;)
+            logging.info(f&#34;SLEEP FINISH SCHEDULED FOR (LOCAL): {datetime.datetime.now()+delta}&#34;)
+            logging.info(f&#34;SLEEP FINISH SCHEDULED FOR (UTC): {datetime.datetime.utcnow()+delta}&#34;)
+            time.sleep(delta.total_seconds())
+        else:
+            logging.info(f&#34;NO SLEEP NEEDED&#34;)
+        logging.info(f&#34;GET {str(source)}&#34;)
+        source.get_image()
+        logging.info(&#34;GET SUCCESSFUL&#34;)
+        logging.info(&#34;-&#34;*80)
+    logging.info(&#34;GOT ALL SOURCES SUCCESSFULLY&#34;)
+    logging.info(&#34;-&#34;*80)
+    logging.info(&#34;MOVE IMAGES TO BACKUP FOLDER&#34;)
+    archive_images()
+    logging.info(&#34;-&#34;*80)</code></pre>
 </details>
 </section>
 <section>
@@ -198,6 +363,47 @@ if __name__ == &#34;__main__&#34;:
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
+<dt id="Clouds.CloudSource.archive_images"><code class="name flex">
+<span>def <span class="ident">archive_images</span></span>(<span>backup_dir=None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Moves the images directory to a backup directory.
+Intended to be run after collecting from all sources processing.
+In Future May Add Option For Compression As Well</p>
+<hr>
+<p>Params:
+backup_dir : str, optional (defaults to None)
+The path to move the images to
+If None, defaults to images/images_archive/{datetime.datetime.now().date()}</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def archive_images(backup_dir=None):
+    &#34;&#34;&#34;
+    Moves the images directory to a backup directory.
+    Intended to be run after collecting from all sources processing.
+    In future may add option for compression as well
+    ---
+    Params:
+    backup_dir : str, optional (defaults to None)
+        The path to move the images to
+        If None, defaults to images/images_archive/{datetime.datetime.now().date()}
+    &#34;&#34;&#34;
+    
+    if backup_dir==None:
+        backup_dir=f&#34;images/images_archive/{datetime.datetime.utcnow().date()}&#34;
+
+    try:
+        os.makedirs(backup_dir)
+        for file_name in os.listdir(&#34;images&#34;):
+            shutil.move(os.path.join(&#34;images&#34;, file_name), backup_dir)
+    except Exception as e:
+        logging.info(&#34;ERROR: Failed to move images to backup folder!&#34;)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)</code></pre>
+</details>
+</dd>
 <dt id="Clouds.CloudSource.delete_file"><code class="name flex">
 <span>def <span class="ident">delete_file</span></span>(<span>file_path: str) ‑> bool</span>
 </code></dt>
@@ -228,7 +434,7 @@ False otherwise</p></div>
     &#34;&#34;&#34;
 
     if os.path.exists(file_path):
-        logging.info(f&#34;REMOVING FILE {file_path}&#34;)
+        logging.debug(f&#34;REMOVING FILE {file_path}&#34;)
         try:
             os.remove(file_path)
         except IsADirectoryError as e:
@@ -244,8 +450,125 @@ False otherwise</p></div>
         logging.info(f&#34;FILE REMOVED&#34;)
         return True
     else:
-        logging.info(f&#34;{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED&#34;)
+        logging.debug(f&#34;{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED&#34;)
         return True</code></pre>
+</details>
+</dd>
+<dt id="Clouds.CloudSource.get_cloud_sources"><code class="name flex">
+<span>def <span class="ident">get_cloud_sources</span></span>(<span>clouds_data_file: str = 'Clouds/CloudSourcesData.json') ‑> List[<a title="Clouds.CloudSource.CloudSource" href="#Clouds.CloudSource.CloudSource">CloudSource</a>]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get all cloud sources specified in a data file.
+See The Readme For Specification</p>
+<hr>
+<p>Params
+clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
+The json file to get the cloud source from</p>
+<hr>
+<p>Returns : List[CloudSource]
+A list of all of the cloud sources specified</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_cloud_sources(clouds_data_file:str = &#34;Clouds/CloudSourcesData.json&#34;) -&gt; List[CloudSource]:
+    &#34;&#34;&#34;
+    Get all cloud sources specified in a data file.
+    See the readme for specification
+    ---
+    Params
+    clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
+        The json file to get the cloud source from
+    ---
+    Returns : List[CloudSource]
+        A list of all of the cloud sources specified
+    &#34;&#34;&#34;
+    logging.info(&#34;LOAD DATA&#34;)
+    data_file = open(clouds_data_file)
+    # cloud_data = data_file.readlines()
+    cloud_data = json.load(data_file)
+    data_file.close()
+    logging.info(cloud_data)
+    logging.info(&#34;DATA LOADED&#34;)
+    logging.info(&#34;-&#34;*80)
+
+    cloud_sources = []
+    logging.info(&#34;LOAD SOURCES&#34;)
+    for cloud_source_data in cloud_data[&#34;CloudSources&#34;]:
+        name = cloud_source_data[&#34;name&#34;]
+        url = cloud_source_data[&#34;url&#34;]
+        crop_coords = cloud_source_data[&#34;crop_coords&#34;]
+        for time in cloud_source_data[&#34;time_list&#34;]:
+            logging.info(f&#34;{name}, {url}, {crop_coords}, {time}&#34;)
+            cloud_source = CloudSource(name, url, literal_eval(crop_coords), time)
+            logging.debug(cloud_source)
+            cloud_sources.append(cloud_source)
+
+    logging.info(&#34;SOURCES LOADED&#34;)
+
+    return cloud_sources</code></pre>
+</details>
+</dd>
+<dt id="Clouds.CloudSource.wget_sources"><code class="name flex">
+<span>def <span class="ident">wget_sources</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>For all of the cloud sources in the cloud source json file, get the image from that source for this day.
+This is currently very static, intended to get the job done quickly. In future this may be parameterized.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wget_sources():
+    &#34;&#34;&#34;
+    For all of the cloud sources in the cloud source json file, get the image from that source for this day.
+    This is currently very static, intended to get the job done quickly. In future this may be parameterized.
+    &#34;&#34;&#34;
+
+    cloud_sources:List[CloudSource] = get_cloud_sources()
+    logging.debug(cloud_sources)
+    logging.info(&#34;-&#34;*80)
+
+    logging.info(&#34;GET TARGET TIMES&#34;)
+    for source in cloud_sources:
+        now = datetime.datetime.utcnow()
+        logging.debug(f&#34;{now=}&#34;)
+        logging.debug(f&#34;{source=}&#34;)
+        source.set_target_time(now)
+
+    logging.info(&#34;TARGET TIMES CREATED&#34;)
+    logging.info(&#34;-&#34;*80)
+    logging.info(&#34;SORTING SOURCES&#34;)
+    cloud_sources.sort(key = lambda x:x.target_time)
+    logging.info(&#34;SOURCES SORTED&#34;)
+    for source in cloud_sources:
+        logging.info(f&#34;{str(source):&lt;50}{source.target_time}&#34;)
+
+    logging.info(&#34;-&#34;*80)
+
+    logging.info(&#34;START GET FROM SOURCES&#34;)
+    for source in cloud_sources:
+        logging.info(f&#34;{source=}&#34;)
+        logging.info(f&#34;CURRENT TIME (LOCAL): {datetime.datetime.now()}&#34;)
+        logging.info(f&#34;CURRENT TIME (UTC): {datetime.datetime.utcnow()}&#34;)
+        now = datetime.datetime.utcnow()
+        delta = source.target_time - now
+        if delta.total_seconds() &gt; 0:
+            logging.info(f&#34;SLEEPING FOR {delta.total_seconds()}s&#34;)
+            logging.info(f&#34;SLEEP FINISH SCHEDULED FOR (LOCAL): {datetime.datetime.now()+delta}&#34;)
+            logging.info(f&#34;SLEEP FINISH SCHEDULED FOR (UTC): {datetime.datetime.utcnow()+delta}&#34;)
+            time.sleep(delta.total_seconds())
+        else:
+            logging.info(f&#34;NO SLEEP NEEDED&#34;)
+        logging.info(f&#34;GET {str(source)}&#34;)
+        source.get_image()
+        logging.info(&#34;GET SUCCESSFUL&#34;)
+        logging.info(&#34;-&#34;*80)
+    logging.info(&#34;GOT ALL SOURCES SUCCESSFULLY&#34;)
+    logging.info(&#34;-&#34;*80)
+    logging.info(&#34;MOVE IMAGES TO BACKUP FOLDER&#34;)
+    archive_images()
+    logging.info(&#34;-&#34;*80)</code></pre>
 </details>
 </dd>
 </dl>
@@ -324,9 +647,9 @@ e.g. '10:24' or '23:11'</p></div>
             A debug string of this objects attributes
         &#34;&#34;&#34;
 
-        return f&#34;CloudSource: {self.name}\n\tURL: {self.url}\n\tcrop_coords: {self.crop_coords}\n\tTime: {self.time}&#34;
+        return f&#34;CloudSource: {self.name}, URL: {self.url}, crop_coords: {self.crop_coords}, Time: {self.time}&#34;
 
-    def get_image(self, image_name:str = None, directory:str=&#34;images/&#34;) -&gt; bool:
+    def get_image(self, image_name:str = None, directory:str=&#34;images/current_downloads&#34;) -&gt; bool:
         &#34;&#34;&#34;
         Get the most recent image from this cloud source, crop it, and save it
         ---
@@ -339,17 +662,16 @@ e.g. '10:24' or '23:11'</p></div>
             True if image is successfully downloaded and cropped, false otherwise
         &#34;&#34;&#34;
 
-        logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
-        if image_name == None:
-            image_name = f&#34;{directory}{str(self)}.png&#34;
-
-        logging.debug(f&#34;{image_name=}&#34;)
-        logging.debug(f&#34;{self.url=}&#34;)
-
-        delete_file(image_name)
-
         try:
+            logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
+            if image_name == None:
+                image_name = f&#34;{directory}{str(self)}.png&#34;
+
+            logging.debug(f&#34;{image_name=}&#34;)
+            logging.debug(f&#34;{self.url=}&#34;)
+            delete_file(image_name)
             wget.download(self.url, image_name)
+            logging.info(&#34;DOWNLOAD COMPLETE&#34;)
         except ValueError as e:
             logging.info(f&#34;ERROR: ValueError found during download of {self.name}! URL form not recognized&#34;)
             delete_file(image_name)
@@ -362,35 +684,83 @@ e.g. '10:24' or '23:11'</p></div>
             logging.debug(f&#34;{e=}&#34;)
             logging.debug(f&#34;{type(e)=}&#34;)
             return False
+        except ContentTooShortError as e:
+            logging.info(f&#34;ERROR: Content too short during download of {self.name}! Check URL and retry&#34;)
+            delete_file(image_name)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+        except Exception as e:
+            logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+            delete_file(image_name)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+
         try:
+            logging.info(&#34;CROPPING IMAGE&#34;)
+            logging.debug(f&#34;Opening {image_name} with PIL&#34;)
             im = Image.open(image_name)
+            logging.debug(f&#34;Source Dimensions: {im.size}&#34;)
+            logging.debug(f&#34;Target Dimensions: {self.crop_coords=}&#34;)
+            cropped_im = im.crop(self.crop_coords)
+            logging.debug(&#34;Image cropped, saving image...&#34;)
+            cropped_im.save(image_name)
             im.close()
+            cropped_im.close()
+            logging.info(&#34;IMAGE SAVED&#34;)
         except UnidentifiedImageError as e: 
             logging.info(f&#34;ERROR: Unidentified image from source {self.name}! URL may be broken&#34;)
             delete_file(image_name)
             logging.debug(f&#34;{e=}&#34;)
             logging.debug(f&#34;{type(e)=}&#34;)
             return False
-
-        logging.info(&#34;DOWNLOAD COMPLETE&#34;)
-        logging.info(&#34;CROPPING IMAGE&#34;)
-        logging.debug(f&#34;Opening {image_name} with PIL&#34;)
-        im = Image.open(image_name)
-        logging.debug(f&#34;Source Dimensions: {im.size}&#34;)
-        logging.debug(f&#34;Target Dimensions: {self.crop_coords=}&#34;)
-        cropped_im = im.crop(self.crop_coords)
-        logging.debug(&#34;Image cropped, saving image...&#34;)
-        try:
-            cropped_im.save(image_name)
+        except FileNotFoundError as e:
+            logging.info(f&#34;ERROR: File {self.name} not found! Download may have failed&#34;)
+            delete_file(image_name)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
         except SystemError as e:
             logging.info(f&#34;ERROR: System error during save of {self.name}! Check config and retry&#34;)
             delete_file(image_name)
             logging.debug(f&#34;{e=}&#34;)
             logging.debug(f&#34;{type(e)=}&#34;)
             return False
-        logging.info(&#34;IMAGE SAVED&#34;)
+        except Exception as e:
+            logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+            delete_file(image_name)
+            logging.info(f&#34;{e=}&#34;)
+            logging.info(f&#34;{type(e)=}&#34;)
+            return False           
+        return True
 
-        return True</code></pre>
+    def set_target_time(self, now:datetime.datetime) -&gt; datetime.datetime:
+        &#34;&#34;&#34;
+        Given a time representing now (conventionally in UTC but depending on your sources configuration),
+        return a datetime object that represents the time of this sources trigger.
+        Also sets this object as a datafield of this CloudSource object
+
+        ---
+
+        Params
+        now : datetime.datetime
+            A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)
+        
+        ---
+        
+        Returns : datetime.datetime
+            A datetime object representing the time at which this source should be triggered      
+        &#34;&#34;&#34;
+
+        # Get hour and minute of this source
+        hour = int(self.time.split(&#34;:&#34;)[0])
+        minute = int(self.time.split(&#34;:&#34;)[1])
+        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0)
+        # If our target time is in the past, we must make the target time in the future by adding a day
+        if self.target_time&lt;now:
+            self.target_time += datetime.timedelta(days=1)
+        return self.target_time</code></pre>
 </details>
 <h3>Methods</h3>
 <dl>
@@ -413,11 +783,11 @@ A debug string of this objects attributes</p></div>
         A debug string of this objects attributes
     &#34;&#34;&#34;
 
-    return f&#34;CloudSource: {self.name}\n\tURL: {self.url}\n\tcrop_coords: {self.crop_coords}\n\tTime: {self.time}&#34;</code></pre>
+    return f&#34;CloudSource: {self.name}, URL: {self.url}, crop_coords: {self.crop_coords}, Time: {self.time}&#34;</code></pre>
 </details>
 </dd>
 <dt id="Clouds.CloudSource.CloudSource.get_image"><code class="name flex">
-<span>def <span class="ident">get_image</span></span>(<span>self, image_name: str = None, directory: str = 'images/') ‑> bool</span>
+<span>def <span class="ident">get_image</span></span>(<span>self, image_name: str = None, directory: str = 'images/current_downloads') ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><h2 id="get-the-most-recent-image-from-this-cloud-source-crop-it-and-save-it">Get the most recent image from this cloud source, crop it, and save it</h2>
@@ -432,7 +802,7 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_image(self, image_name:str = None, directory:str=&#34;images/&#34;) -&gt; bool:
+<pre><code class="python">def get_image(self, image_name:str = None, directory:str=&#34;images/current_downloads&#34;) -&gt; bool:
     &#34;&#34;&#34;
     Get the most recent image from this cloud source, crop it, and save it
     ---
@@ -445,17 +815,16 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
         True if image is successfully downloaded and cropped, false otherwise
     &#34;&#34;&#34;
 
-    logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
-    if image_name == None:
-        image_name = f&#34;{directory}{str(self)}.png&#34;
-
-    logging.debug(f&#34;{image_name=}&#34;)
-    logging.debug(f&#34;{self.url=}&#34;)
-
-    delete_file(image_name)
-
     try:
+        logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
+        if image_name == None:
+            image_name = f&#34;{directory}{str(self)}.png&#34;
+
+        logging.debug(f&#34;{image_name=}&#34;)
+        logging.debug(f&#34;{self.url=}&#34;)
+        delete_file(image_name)
         wget.download(self.url, image_name)
+        logging.info(&#34;DOWNLOAD COMPLETE&#34;)
     except ValueError as e:
         logging.info(f&#34;ERROR: ValueError found during download of {self.name}! URL form not recognized&#34;)
         delete_file(image_name)
@@ -468,35 +837,102 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
         logging.debug(f&#34;{e=}&#34;)
         logging.debug(f&#34;{type(e)=}&#34;)
         return False
+    except ContentTooShortError as e:
+        logging.info(f&#34;ERROR: Content too short during download of {self.name}! Check URL and retry&#34;)
+        delete_file(image_name)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        return False
+    except Exception as e:
+        logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+        delete_file(image_name)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        return False
+
     try:
+        logging.info(&#34;CROPPING IMAGE&#34;)
+        logging.debug(f&#34;Opening {image_name} with PIL&#34;)
         im = Image.open(image_name)
+        logging.debug(f&#34;Source Dimensions: {im.size}&#34;)
+        logging.debug(f&#34;Target Dimensions: {self.crop_coords=}&#34;)
+        cropped_im = im.crop(self.crop_coords)
+        logging.debug(&#34;Image cropped, saving image...&#34;)
+        cropped_im.save(image_name)
         im.close()
+        cropped_im.close()
+        logging.info(&#34;IMAGE SAVED&#34;)
     except UnidentifiedImageError as e: 
         logging.info(f&#34;ERROR: Unidentified image from source {self.name}! URL may be broken&#34;)
         delete_file(image_name)
         logging.debug(f&#34;{e=}&#34;)
         logging.debug(f&#34;{type(e)=}&#34;)
         return False
-
-    logging.info(&#34;DOWNLOAD COMPLETE&#34;)
-    logging.info(&#34;CROPPING IMAGE&#34;)
-    logging.debug(f&#34;Opening {image_name} with PIL&#34;)
-    im = Image.open(image_name)
-    logging.debug(f&#34;Source Dimensions: {im.size}&#34;)
-    logging.debug(f&#34;Target Dimensions: {self.crop_coords=}&#34;)
-    cropped_im = im.crop(self.crop_coords)
-    logging.debug(&#34;Image cropped, saving image...&#34;)
-    try:
-        cropped_im.save(image_name)
+    except FileNotFoundError as e:
+        logging.info(f&#34;ERROR: File {self.name} not found! Download may have failed&#34;)
+        delete_file(image_name)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        return False
     except SystemError as e:
         logging.info(f&#34;ERROR: System error during save of {self.name}! Check config and retry&#34;)
         delete_file(image_name)
         logging.debug(f&#34;{e=}&#34;)
         logging.debug(f&#34;{type(e)=}&#34;)
         return False
-    logging.info(&#34;IMAGE SAVED&#34;)
-
+    except Exception as e:
+        logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+        delete_file(image_name)
+        logging.info(f&#34;{e=}&#34;)
+        logging.info(f&#34;{type(e)=}&#34;)
+        return False           
     return True</code></pre>
+</details>
+</dd>
+<dt id="Clouds.CloudSource.CloudSource.set_target_time"><code class="name flex">
+<span>def <span class="ident">set_target_time</span></span>(<span>self, now: datetime.datetime) ‑> datetime.datetime</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Given a time representing now (conventionally in UTC but depending on your sources configuration),
+return a datetime object that represents the time of this sources trigger.
+Also sets this object as a datafield of this CloudSource object</p>
+<hr>
+<p>Params
+now : datetime.datetime
+A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)</p>
+<hr>
+<p>Returns : datetime.datetime
+A datetime object representing the time at which this source should be triggered</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def set_target_time(self, now:datetime.datetime) -&gt; datetime.datetime:
+    &#34;&#34;&#34;
+    Given a time representing now (conventionally in UTC but depending on your sources configuration),
+    return a datetime object that represents the time of this sources trigger.
+    Also sets this object as a datafield of this CloudSource object
+
+    ---
+
+    Params
+    now : datetime.datetime
+        A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)
+    
+    ---
+    
+    Returns : datetime.datetime
+        A datetime object representing the time at which this source should be triggered      
+    &#34;&#34;&#34;
+
+    # Get hour and minute of this source
+    hour = int(self.time.split(&#34;:&#34;)[0])
+    minute = int(self.time.split(&#34;:&#34;)[1])
+    self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0)
+    # If our target time is in the past, we must make the target time in the future by adding a day
+    if self.target_time&lt;now:
+        self.target_time += datetime.timedelta(days=1)
+    return self.target_time</code></pre>
 </details>
 </dd>
 </dl>
@@ -517,7 +953,10 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
+<li><code><a title="Clouds.CloudSource.archive_images" href="#Clouds.CloudSource.archive_images">archive_images</a></code></li>
 <li><code><a title="Clouds.CloudSource.delete_file" href="#Clouds.CloudSource.delete_file">delete_file</a></code></li>
+<li><code><a title="Clouds.CloudSource.get_cloud_sources" href="#Clouds.CloudSource.get_cloud_sources">get_cloud_sources</a></code></li>
+<li><code><a title="Clouds.CloudSource.wget_sources" href="#Clouds.CloudSource.wget_sources">wget_sources</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
@@ -527,6 +966,7 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
 <ul class="">
 <li><code><a title="Clouds.CloudSource.CloudSource.debug_str" href="#Clouds.CloudSource.CloudSource.debug_str">debug_str</a></code></li>
 <li><code><a title="Clouds.CloudSource.CloudSource.get_image" href="#Clouds.CloudSource.CloudSource.get_image">get_image</a></code></li>
+<li><code><a title="Clouds.CloudSource.CloudSource.set_target_time" href="#Clouds.CloudSource.CloudSource.set_target_time">set_target_time</a></code></li>
 </ul>
 </li>
 </ul>
