@@ -51,14 +51,18 @@ logging.basicConfig(filename=f&#34;logs/{str(datetime.datetime.utcnow().date())}
 class CloudSource:
     &#34;&#34;&#34;
     An object that holds information on a cloud source (a live webcam).
+    
     This includes the URL to the webcam (to wget from) and the coords to crop at
     &#34;&#34;&#34;
 
     def __init__(self, name: str, url: str, crop_coords: Tuple[int, int, int, int], time: str) -&gt; None:
         &#34;&#34;&#34;
         Create a new CloudSource given the required information.
+
         ---
+
         Params:
+
         name : str
             The name of this cloud source, used to identify the source and name files
 
@@ -90,7 +94,9 @@ class CloudSource:
     def debug_str(self) -&gt; str:
         &#34;&#34;&#34;
         Return a debug of this cloud object as a string
+
         ---
+
         Returns : str
             A debug string of this objects attributes
         &#34;&#34;&#34;
@@ -100,14 +106,20 @@ class CloudSource:
     def get_image(self, image_name:str = None, directory:str=&#34;images/current_downloads&#34;) -&gt; bool:
         &#34;&#34;&#34;
         Get the most recent image from this cloud source, crop it, and save it
+
         ---
+
         Params:
+
         image_name : str or None (optional, defaults to None)
-            The name to save this image under. If left None, the default name is used
+            The name to save this image under. If left None, the default name is used.
             The default name is date + self.name 
+
         directory : str (optional, defaults to &#34;images/current_downloads&#34;)
             The directory to save the download to
+
         ---
+
         Returns : bool
             True if image is successfully downloaded and cropped, false otherwise
         &#34;&#34;&#34;
@@ -189,11 +201,13 @@ class CloudSource:
         &#34;&#34;&#34;
         Given a time representing now (conventionally in UTC but depending on your sources configuration),
         return a datetime object that represents the time of this sources trigger.
+
         Also sets this object as a datafield of this CloudSource object
 
         ---
 
         Params
+
         now : datetime.datetime
             A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)
         
@@ -215,12 +229,18 @@ class CloudSource:
 def get_cloud_sources(clouds_data_file:str = &#34;Clouds/CloudSourcesData.json&#34;) -&gt; List[CloudSource]:
     &#34;&#34;&#34;
     Get all cloud sources specified in a data file.
+
     See the readme for specification
+
     ---
+
     Params
+
     clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
         The json file to get the cloud source from
+
     ---
+
     Returns : List[CloudSource]
         A list of all of the cloud sources specified
     &#34;&#34;&#34;
@@ -251,12 +271,17 @@ def get_cloud_sources(clouds_data_file:str = &#34;Clouds/CloudSourcesData.json&#
 
 def delete_file(file_path:str)-&gt;bool:
     &#34;&#34;&#34;
-    Delete a file located at file_path, handelling errors.
+    Delete a file located at file_path, handeling errors.
+
     ---
+
     Params
+
     file_path : str
         The path to the file to remove
+
     ---
+
     Returns : Bool
         True if the file no longer exists after method call
         False otherwise
@@ -285,10 +310,15 @@ def delete_file(file_path:str)-&gt;bool:
 def archive_images(backup_dir=None, current_dir=&#34;images/current_downloads&#34;):
     &#34;&#34;&#34;
     Moves the images directory to a backup directory.
+
     Intended to be run after collecting from all sources processing.
-    In future may add option for compression as well
+
+    In future may add option for compression as well.
+
     ---
+
     Params:
+
     backup_dir : str, optional (defaults to None)
         The path to move the images to
         If None, defaults to images/images_archive/{datetime.datetime.now().date()}
@@ -312,6 +342,7 @@ def archive_images(backup_dir=None, current_dir=&#34;images/current_downloads&#3
 def wget_sources():
     &#34;&#34;&#34;
     For all of the cloud sources in the cloud source json file, get the image from that source for this day.
+
     This is currently very static, intended to get the job done quickly. In future this may be parameterized.
     &#34;&#34;&#34;
 
@@ -372,12 +403,12 @@ def wget_sources():
 <span>def <span class="ident">archive_images</span></span>(<span>backup_dir=None, current_dir='images/current_downloads')</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Moves the images directory to a backup directory.
-Intended to be run after collecting from all sources processing.
-In Future May Add Option For Compression As Well</p>
+<div class="desc"><p>Moves the images directory to a backup directory.</p>
+<p>Intended to be run after collecting from all sources processing.</p>
+<p>In future may add option for compression as well.</p>
 <hr>
-<p>Params:
-backup_dir : str, optional (defaults to None)
+<p>Params:</p>
+<p>backup_dir : str, optional (defaults to None)
 The path to move the images to
 If None, defaults to images/images_archive/{datetime.datetime.now().date()}</p>
 <p>current_dir : str (optional, defaults to "images/current_downloads")
@@ -389,10 +420,15 @@ The directory in which the images to archive currently reside</p></div>
 <pre><code class="python">def archive_images(backup_dir=None, current_dir=&#34;images/current_downloads&#34;):
     &#34;&#34;&#34;
     Moves the images directory to a backup directory.
+
     Intended to be run after collecting from all sources processing.
-    In future may add option for compression as well
+
+    In future may add option for compression as well.
+
     ---
+
     Params:
+
     backup_dir : str, optional (defaults to None)
         The path to move the images to
         If None, defaults to images/images_archive/{datetime.datetime.now().date()}
@@ -418,9 +454,10 @@ The directory in which the images to archive currently reside</p></div>
 <span>def <span class="ident">delete_file</span></span>(<span>file_path: str) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="delete-a-file-located-at-file_path-handelling-errors">Delete a file located at file_path, handelling errors.</h2>
-<p>Params
-file_path : str
+<div class="desc"><p>Delete a file located at file_path, handeling errors.</p>
+<hr>
+<p>Params</p>
+<p>file_path : str
 The path to the file to remove</p>
 <hr>
 <p>Returns : Bool
@@ -432,12 +469,17 @@ False otherwise</p></div>
 </summary>
 <pre><code class="python">def delete_file(file_path:str)-&gt;bool:
     &#34;&#34;&#34;
-    Delete a file located at file_path, handelling errors.
+    Delete a file located at file_path, handeling errors.
+
     ---
+
     Params
+
     file_path : str
         The path to the file to remove
+
     ---
+
     Returns : Bool
         True if the file no longer exists after method call
         False otherwise
@@ -468,11 +510,11 @@ False otherwise</p></div>
 <span>def <span class="ident">get_cloud_sources</span></span>(<span>clouds_data_file: str = 'Clouds/CloudSourcesData.json') ‑> List[<a title="Clouds.CloudSource.CloudSource" href="#Clouds.CloudSource.CloudSource">CloudSource</a>]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get all cloud sources specified in a data file.
-See The Readme For Specification</p>
+<div class="desc"><p>Get all cloud sources specified in a data file.</p>
+<p>See the readme for specification</p>
 <hr>
-<p>Params
-clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
+<p>Params</p>
+<p>clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
 The json file to get the cloud source from</p>
 <hr>
 <p>Returns : List[CloudSource]
@@ -484,12 +526,18 @@ A list of all of the cloud sources specified</p></div>
 <pre><code class="python">def get_cloud_sources(clouds_data_file:str = &#34;Clouds/CloudSourcesData.json&#34;) -&gt; List[CloudSource]:
     &#34;&#34;&#34;
     Get all cloud sources specified in a data file.
+
     See the readme for specification
+
     ---
+
     Params
+
     clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
         The json file to get the cloud source from
+
     ---
+
     Returns : List[CloudSource]
         A list of all of the cloud sources specified
     &#34;&#34;&#34;
@@ -523,8 +571,8 @@ A list of all of the cloud sources specified</p></div>
 <span>def <span class="ident">wget_sources</span></span>(<span>)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>For all of the cloud sources in the cloud source json file, get the image from that source for this day.
-This is currently very static, intended to get the job done quickly. In future this may be parameterized.</p></div>
+<div class="desc"><p>For all of the cloud sources in the cloud source json file, get the image from that source for this day.</p>
+<p>This is currently very static, intended to get the job done quickly. In future this may be parameterized.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -532,6 +580,7 @@ This is currently very static, intended to get the job done quickly. In future t
 <pre><code class="python">def wget_sources():
     &#34;&#34;&#34;
     For all of the cloud sources in the cloud source json file, get the image from that source for this day.
+
     This is currently very static, intended to get the job done quickly. In future this may be parameterized.
     &#34;&#34;&#34;
 
@@ -591,11 +640,12 @@ This is currently very static, intended to get the job done quickly. In future t
 <span>(</span><span>name: str, url: str, crop_coords: Tuple[int, int, int, int], time: str)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>An object that holds information on a cloud source (a live webcam).
-This includes the URL to the webcam (to wget from) and the coords to crop at</p>
-<h2 id="create-a-new-cloudsource-given-the-required-information">Create a new CloudSource given the required information.</h2>
-<p>Params:
-name : str
+<div class="desc"><p>An object that holds information on a cloud source (a live webcam).</p>
+<p>This includes the URL to the webcam (to wget from) and the coords to crop at</p>
+<p>Create a new CloudSource given the required information.</p>
+<hr>
+<p>Params:</p>
+<p>name : str
 The name of this cloud source, used to identify the source and name files</p>
 <p>url : str
 The url to call with wget to get an image</p>
@@ -613,14 +663,18 @@ e.g. '10:24' or '23:11'</p></div>
 <pre><code class="python">class CloudSource:
     &#34;&#34;&#34;
     An object that holds information on a cloud source (a live webcam).
+    
     This includes the URL to the webcam (to wget from) and the coords to crop at
     &#34;&#34;&#34;
 
     def __init__(self, name: str, url: str, crop_coords: Tuple[int, int, int, int], time: str) -&gt; None:
         &#34;&#34;&#34;
         Create a new CloudSource given the required information.
+
         ---
+
         Params:
+
         name : str
             The name of this cloud source, used to identify the source and name files
 
@@ -652,7 +706,9 @@ e.g. '10:24' or '23:11'</p></div>
     def debug_str(self) -&gt; str:
         &#34;&#34;&#34;
         Return a debug of this cloud object as a string
+
         ---
+
         Returns : str
             A debug string of this objects attributes
         &#34;&#34;&#34;
@@ -662,14 +718,20 @@ e.g. '10:24' or '23:11'</p></div>
     def get_image(self, image_name:str = None, directory:str=&#34;images/current_downloads&#34;) -&gt; bool:
         &#34;&#34;&#34;
         Get the most recent image from this cloud source, crop it, and save it
+
         ---
+
         Params:
+
         image_name : str or None (optional, defaults to None)
-            The name to save this image under. If left None, the default name is used
+            The name to save this image under. If left None, the default name is used.
             The default name is date + self.name 
+
         directory : str (optional, defaults to &#34;images/current_downloads&#34;)
             The directory to save the download to
+
         ---
+
         Returns : bool
             True if image is successfully downloaded and cropped, false otherwise
         &#34;&#34;&#34;
@@ -751,11 +813,13 @@ e.g. '10:24' or '23:11'</p></div>
         &#34;&#34;&#34;
         Given a time representing now (conventionally in UTC but depending on your sources configuration),
         return a datetime object that represents the time of this sources trigger.
+
         Also sets this object as a datafield of this CloudSource object
 
         ---
 
         Params
+
         now : datetime.datetime
             A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)
         
@@ -780,7 +844,8 @@ e.g. '10:24' or '23:11'</p></div>
 <span>def <span class="ident">debug_str</span></span>(<span>self) ‑> str</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="return-a-debug-of-this-cloud-object-as-a-string">Return A Debug Of This Cloud Object As A String</h2>
+<div class="desc"><p>Return a debug of this cloud object as a string</p>
+<hr>
 <p>Returns : str
 A debug string of this objects attributes</p></div>
 <details class="source">
@@ -790,7 +855,9 @@ A debug string of this objects attributes</p></div>
 <pre><code class="python">def debug_str(self) -&gt; str:
     &#34;&#34;&#34;
     Return a debug of this cloud object as a string
+
     ---
+
     Returns : str
         A debug string of this objects attributes
     &#34;&#34;&#34;
@@ -802,12 +869,13 @@ A debug string of this objects attributes</p></div>
 <span>def <span class="ident">get_image</span></span>(<span>self, image_name: str = None, directory: str = 'images/current_downloads') ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><h2 id="get-the-most-recent-image-from-this-cloud-source-crop-it-and-save-it">Get the most recent image from this cloud source, crop it, and save it</h2>
-<p>Params:
-image_name : str or None (optional, defaults to None)
-The name to save this image under. If left None, the default name is used
-The default name is date + self.name
-directory : str (optional, defaults to "images/current_downloads")
+<div class="desc"><p>Get the most recent image from this cloud source, crop it, and save it</p>
+<hr>
+<p>Params:</p>
+<p>image_name : str or None (optional, defaults to None)
+The name to save this image under. If left None, the default name is used.
+The default name is date + self.name </p>
+<p>directory : str (optional, defaults to "images/current_downloads")
 The directory to save the download to</p>
 <hr>
 <p>Returns : bool
@@ -819,14 +887,20 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
 <pre><code class="python">def get_image(self, image_name:str = None, directory:str=&#34;images/current_downloads&#34;) -&gt; bool:
     &#34;&#34;&#34;
     Get the most recent image from this cloud source, crop it, and save it
+
     ---
+
     Params:
+
     image_name : str or None (optional, defaults to None)
-        The name to save this image under. If left None, the default name is used
+        The name to save this image under. If left None, the default name is used.
         The default name is date + self.name 
+
     directory : str (optional, defaults to &#34;images/current_downloads&#34;)
         The directory to save the download to
+
     ---
+
     Returns : bool
         True if image is successfully downloaded and cropped, false otherwise
     &#34;&#34;&#34;
@@ -910,11 +984,11 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Given a time representing now (conventionally in UTC but depending on your sources configuration),
-return a datetime object that represents the time of this sources trigger.
-Also sets this object as a datafield of this CloudSource object</p>
+return a datetime object that represents the time of this sources trigger.</p>
+<p>Also sets this object as a datafield of this CloudSource object</p>
 <hr>
-<p>Params
-now : datetime.datetime
+<p>Params</p>
+<p>now : datetime.datetime
 A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)</p>
 <hr>
 <p>Returns : datetime.datetime
@@ -927,11 +1001,13 @@ A datetime object representing the time at which this source should be triggered
     &#34;&#34;&#34;
     Given a time representing now (conventionally in UTC but depending on your sources configuration),
     return a datetime object that represents the time of this sources trigger.
+
     Also sets this object as a datafield of this CloudSource object
 
     ---
 
     Params
+
     now : datetime.datetime
         A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)
     

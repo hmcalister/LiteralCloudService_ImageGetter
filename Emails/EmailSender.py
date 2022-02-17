@@ -21,14 +21,19 @@ logging.info("-"*80)
 def get_sender_login(data_json = "emails/email_data.json"):
     """
     Get the login details for the sender email account
+
     ---
+
     Params 
+
     data_json : Str
         The path to the json file containing the sender login data
         Organized by "sender_address" and "email_password"
+
     ---
+
     Returns : 2-tuple of strings 
-    sender_email, password
+        sender_email, password
     """
 
     # Get the email account data to log into server
@@ -42,11 +47,16 @@ def get_sender_login(data_json = "emails/email_data.json"):
 def get_receiver_emails(receiver_emails_file = "emails/email_list.txt"):
     """
     Get all of the receiver email addresses to send emails to
+
     ---
+
     Params
+
     receiver_emails_file : Str
         The path to the file containing the receiver email addresses
+
     ---
+
     Returns : List[Str]
         A list of strings of the receiver email addresses
     """
@@ -58,13 +68,19 @@ def get_receiver_emails(receiver_emails_file = "emails/email_list.txt"):
 
 def get_message(message_list_file = "emails/message_list.txt"):
     """
-    Get a random message from a file containing messages
-    Will be used to set the email body
+    Get a random message from a file containing messages.
+
+    Will be used to set the email body.
+
     ---
+
     Params
+
     message_list_file : Str
         The path to the file containing the messages
+
     ---
+
     Returns : Str
         A single string, one message from the message list file 
     """
@@ -78,11 +94,16 @@ def get_message(message_list_file = "emails/message_list.txt"):
 def get_image(image_directory="images/email_images"):
     """
     Get a single random image from a folder
+
     ---
+
     Params
+
     image_directory : Str
         The path to the file containing the images to choose from
+
     ---
+
     Returns : Str
         The path to the image chosen
     """
@@ -100,12 +121,17 @@ def get_image(image_directory="images/email_images"):
 
 def delete_image(file_path):
     """
-    Delete a file located at file_path, handelling errors.
+    Delete a file located at file_path, handeling errors.
+
     ---
+
     Params
+
     file_path : str
         The path to the file to remove
+
     ---
+
     Returns : Bool
         True if the file no longer exists after method call
         False otherwise
@@ -133,9 +159,13 @@ def delete_image(file_path):
 
 def check_images_remaining(image_directory="images/email_images"):
     """
+
     Check how many images remain in the directory, and sends an email to an admin if this is below a threshold
+
     ---
+
     Params
+    
     image_directory : Str
         The path to the file containing the images to choose from
     """

@@ -23,14 +23,18 @@ logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-clo
 class CloudSource:
     """
     An object that holds information on a cloud source (a live webcam).
+    
     This includes the URL to the webcam (to wget from) and the coords to crop at
     """
 
     def __init__(self, name: str, url: str, crop_coords: Tuple[int, int, int, int], time: str) -> None:
         """
         Create a new CloudSource given the required information.
+
         ---
+
         Params:
+
         name : str
             The name of this cloud source, used to identify the source and name files
 
@@ -62,7 +66,9 @@ class CloudSource:
     def debug_str(self) -> str:
         """
         Return a debug of this cloud object as a string
+
         ---
+
         Returns : str
             A debug string of this objects attributes
         """
@@ -72,14 +78,20 @@ class CloudSource:
     def get_image(self, image_name:str = None, directory:str="images/current_downloads") -> bool:
         """
         Get the most recent image from this cloud source, crop it, and save it
+
         ---
+
         Params:
+
         image_name : str or None (optional, defaults to None)
-            The name to save this image under. If left None, the default name is used
+            The name to save this image under. If left None, the default name is used.
             The default name is date + self.name 
+
         directory : str (optional, defaults to "images/current_downloads")
             The directory to save the download to
+
         ---
+
         Returns : bool
             True if image is successfully downloaded and cropped, false otherwise
         """
@@ -161,11 +173,13 @@ class CloudSource:
         """
         Given a time representing now (conventionally in UTC but depending on your sources configuration),
         return a datetime object that represents the time of this sources trigger.
+
         Also sets this object as a datafield of this CloudSource object
 
         ---
 
         Params
+
         now : datetime.datetime
             A datetime object representing now (conventionally in UTC but should be in a representation that fits your sources)
         
@@ -187,12 +201,18 @@ class CloudSource:
 def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> List[CloudSource]:
     """
     Get all cloud sources specified in a data file.
+
     See the readme for specification
+
     ---
+
     Params
+
     clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
         The json file to get the cloud source from
+
     ---
+
     Returns : List[CloudSource]
         A list of all of the cloud sources specified
     """
@@ -223,12 +243,17 @@ def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> 
 
 def delete_file(file_path:str)->bool:
     """
-    Delete a file located at file_path, handelling errors.
+    Delete a file located at file_path, handeling errors.
+
     ---
+
     Params
+
     file_path : str
         The path to the file to remove
+
     ---
+
     Returns : Bool
         True if the file no longer exists after method call
         False otherwise
@@ -257,10 +282,15 @@ def delete_file(file_path:str)->bool:
 def archive_images(backup_dir=None, current_dir="images/current_downloads"):
     """
     Moves the images directory to a backup directory.
+
     Intended to be run after collecting from all sources processing.
-    In future may add option for compression as well
+
+    In future may add option for compression as well.
+
     ---
+
     Params:
+
     backup_dir : str, optional (defaults to None)
         The path to move the images to
         If None, defaults to images/images_archive/{datetime.datetime.now().date()}
@@ -284,6 +314,7 @@ def archive_images(backup_dir=None, current_dir="images/current_downloads"):
 def wget_sources():
     """
     For all of the cloud sources in the cloud source json file, get the image from that source for this day.
+
     This is currently very static, intended to get the job done quickly. In future this may be parameterized.
     """
 
