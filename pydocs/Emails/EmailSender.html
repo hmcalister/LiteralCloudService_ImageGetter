@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>Emails.EmailSender API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>Emails.EmailSender</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">import smtplib, ssl, os, logging, random, datetime, json, time
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+
+logging.Formatter.converter = time.gmtime
+logging.basicConfig(filename=f&#34;logs/{str(datetime.datetime.utcnow().date())}-email.log&#34;,
+    format=&#39;%(asctime)s %(levelname)-8s %(message)s&#39;,
+    level=logging.INFO,
+    datefmt=&#39;%Y-%m-%d %H:%M:%S&#39;)
+
+ADMIN_EMAIL = &#34;haydenmcalister49@gmail.com&#34;
+
+logging.info(&#34;-&#34;*80)
+logging.info(&#34;*&#34;*80)
+logging.info(f&#34;SCRIPT START AT LOCAL {datetime.datetime.now()}&#34;)
+logging.info(f&#34;SCRIPT START AT UTC {datetime.datetime.utcnow()}&#34;)
+logging.info(&#34;*&#34;*80)
+logging.info(&#34;-&#34;*80)
+
+def get_sender_login(data_json = &#34;emails/email_data.json&#34;):
+    &#34;&#34;&#34;
+    Get the login details for the sender email account
+    ---
+    Params 
+    data_json : Str
+        The path to the json file containing the sender login data
+        Organized by &#34;sender_address&#34; and &#34;email_password&#34;
+    ---
+    Returns : 2-tuple of strings 
+    sender_email, password
+    &#34;&#34;&#34;
+
+    # Get the email account data to log into server
+    email_data_file = open(data_json)
+    email_data = json.load(email_data_file)
+    email_data_file.close() 
+    sender_email = email_data[&#34;sender_address&#34;]
+    password = email_data[&#34;email_password&#34;]
+    return sender_email, password
+
+def get_receiver_emails(receiver_emails_file = &#34;emails/email_list.txt&#34;):
+    &#34;&#34;&#34;
+    Get all of the receiver email addresses to send emails to
+    ---
+    Params
+    receiver_emails_file : Str
+        The path to the file containing the receiver email addresses
+    ---
+    Returns : List[Str]
+        A list of strings of the receiver email addresses
+    &#34;&#34;&#34;
+    
+    emails = []
+    with open(receiver_emails_file, &#34;r&#34;) as f:
+        emails = f.readlines()
+    return emails
+
+def get_message(message_list_file = &#34;emails/message_list.txt&#34;):
+    &#34;&#34;&#34;
+    Get a random message from a file containing messages
+    Will be used to set the email body
+    ---
+    Params
+    message_list_file : Str
+        The path to the file containing the messages
+    ---
+    Returns : Str
+        A single string, one message from the message list file 
+    &#34;&#34;&#34;
+    
+    messages = []
+    with open(message_list_file, &#34;r&#34;) as f:
+        messages = f.readlines()
+    message = random.choice(messages)
+    return message
+
+def get_image(image_directory=&#34;images/email_images&#34;):
+    &#34;&#34;&#34;
+    Get a single random image from a folder
+    ---
+    Params
+    image_directory : Str
+        The path to the file containing the images to choose from
+    ---
+    Returns : Str
+        The path to the image chosen
+    &#34;&#34;&#34;
+    
+    images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
+    # I want this to fail if no images present, something has gone wrong!
+    try:
+        image = random.choice(images)
+    except IndexError as e:
+        logging.info(&#34;ERROR: No images to select from!&#34;)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        exit(1)
+    return os.path.join(image_directory, image)
+
+def delete_image(file_path):
+    &#34;&#34;&#34;
+    Delete a file located at file_path, handelling errors.
+    ---
+    Params
+    file_path : str
+        The path to the file to remove
+    ---
+    Returns : Bool
+        True if the file no longer exists after method call
+        False otherwise
+    &#34;&#34;&#34;
+
+    if os.path.exists(file_path):
+        logging.debug(f&#34;REMOVING FILE {file_path}&#34;)
+        try:
+            os.remove(file_path)
+        except IsADirectoryError as e:
+            logging.info(f&#34;ERROR: {file_path} is a directory&#34;)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+        except OSError as e:
+            logging.info(f&#34;ERROR: {file_path} CANNOT BE REMOVED&#34;)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+        logging.info(f&#34;FILE REMOVED&#34;)
+        return True
+    else:
+        logging.debug(f&#34;{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED&#34;)
+        return True
+
+def check_images_remaining(image_directory=&#34;images/email_images&#34;):
+    &#34;&#34;&#34;
+    Check how many images remain in the directory, and sends an email to an admin if this is below a threshold
+    ---
+    Params
+    image_directory : Str
+        The path to the file containing the images to choose from
+    &#34;&#34;&#34;
+
+    MIN_IMAGES = 3
+    images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
+    logging.info(f&#34;{len(images)} remain in {image_directory}&#34;)
+    if len(images)&lt;=MIN_IMAGES:
+        logging.info(f&#34;Notifying admin {ADMIN_EMAIL}&#34;)
+        server = &#34;smtp.gmail.com&#34;,
+        port = 465
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
+            sender_email, password = get_sender_login()
+            server.login(sender_email, password)
+            msg = MIMEMultipart()
+            msg[&#39;Subject&#39;] = &#34;Warning: Cloud Emails Running Out!&#34;
+            msg[&#39;From&#39;] = sender_email
+            msg[&#39;To&#39;] = ADMIN_EMAIL
+            msg.attach(MIMEText(f&#34;Only {len(images)} remain in directory!&#34;))
+            logging.info(f&#34;Sending email to {ADMIN_EMAIL}&#34;)
+            server.sendmail(sender_email, ADMIN_EMAIL, msg.as_string())
+            logging.info(&#34;Email sent successfully&#34;)
+            logging.info(&#34;-&#34;*80)
+    
+def send_email():
+    &#34;&#34;&#34;
+    Send an email to the list of email recipients, choosing a random message and image, then deleting that image to avoid duplicates
+    &#34;&#34;&#34;
+
+    logging.info(&#34;Started email method...&#34;)
+
+    server = &#34;smtp.gmail.com&#34;,
+    port = 465
+
+    receiver_emails = get_receiver_emails()
+    message = get_message()
+    logging.info(f&#34;{message=}&#34;)
+    img_file = get_image()
+    logging.info(f&#34;{img_file=}&#34;)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
+        logging.info(&#34;Accessed email server...&#34;)
+        logging.info(&#34;Logging into server with credentials...&#34;)
+        sender_email, password = get_sender_login()
+        server.login(sender_email, password)
+        
+        logging.info(f&#34;Accessing file {img_file=}&#34;)
+        with open(img_file, &#39;rb&#39;) as f:
+            img_data = f.read()
+        logging.info(f&#34;File {img_file=} successfully loaded&#34;)
+        
+        logging.info(&#34;-&#34;*80)
+
+        for receiver_email in receiver_emails:
+            logging.info(f&#34;RECEIVER: {receiver_email}&#34;)
+            logging.info(&#34;Starting MIME generation&#34;)
+            msg = MIMEMultipart()
+            msg[&#39;Subject&#39;] = &#34;Wow! New cloud just dropped!&#34;
+            msg[&#39;From&#39;] = sender_email
+            msg[&#39;To&#39;] = receiver_email
+            logging.info(&#34;MIME msg metadata loaded&#34;)
+            text = MIMEText(message)
+            msg.attach(text)
+            image = MIMEImage(img_data, name=os.path.basename(img_file))
+            msg.attach(image)
+            logging.info(&#34;MIME msg body loaded&#34;)
+
+            logging.info(f&#34;Sending email to {receiver_email}&#34;)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            logging.info(&#34;Email sent successfully&#34;)
+            logging.info(&#34;-&#34;*80)
+
+    logging.info(&#34;Deleting image&#34;)
+    delete_image(img_file)
+    logging.info(&#34;Image deleted&#34;)
+    logging.info(&#34;EMAILING FINISHED&#34;)
+    logging.info(&#34;*&#34;*80)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="Emails.EmailSender.check_images_remaining"><code class="name flex">
+<span>def <span class="ident">check_images_remaining</span></span>(<span>image_directory='images/email_images')</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="check-how-many-images-remain-in-the-directory-and-sends-an-email-to-an-admin-if-this-is-below-a-threshold">Check how many images remain in the directory, and sends an email to an admin if this is below a threshold</h2>
+<p>Params
+image_directory : Str
+The path to the file containing the images to choose from</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check_images_remaining(image_directory=&#34;images/email_images&#34;):
+    &#34;&#34;&#34;
+    Check how many images remain in the directory, and sends an email to an admin if this is below a threshold
+    ---
+    Params
+    image_directory : Str
+        The path to the file containing the images to choose from
+    &#34;&#34;&#34;
+
+    MIN_IMAGES = 3
+    images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
+    logging.info(f&#34;{len(images)} remain in {image_directory}&#34;)
+    if len(images)&lt;=MIN_IMAGES:
+        logging.info(f&#34;Notifying admin {ADMIN_EMAIL}&#34;)
+        server = &#34;smtp.gmail.com&#34;,
+        port = 465
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
+            sender_email, password = get_sender_login()
+            server.login(sender_email, password)
+            msg = MIMEMultipart()
+            msg[&#39;Subject&#39;] = &#34;Warning: Cloud Emails Running Out!&#34;
+            msg[&#39;From&#39;] = sender_email
+            msg[&#39;To&#39;] = ADMIN_EMAIL
+            msg.attach(MIMEText(f&#34;Only {len(images)} remain in directory!&#34;))
+            logging.info(f&#34;Sending email to {ADMIN_EMAIL}&#34;)
+            server.sendmail(sender_email, ADMIN_EMAIL, msg.as_string())
+            logging.info(&#34;Email sent successfully&#34;)
+            logging.info(&#34;-&#34;*80)</code></pre>
+</details>
+</dd>
+<dt id="Emails.EmailSender.delete_image"><code class="name flex">
+<span>def <span class="ident">delete_image</span></span>(<span>file_path)</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="delete-a-file-located-at-file_path-handelling-errors">Delete a file located at file_path, handelling errors.</h2>
+<p>Params
+file_path : str
+The path to the file to remove</p>
+<hr>
+<p>Returns : Bool
+True if the file no longer exists after method call
+False otherwise</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delete_image(file_path):
+    &#34;&#34;&#34;
+    Delete a file located at file_path, handelling errors.
+    ---
+    Params
+    file_path : str
+        The path to the file to remove
+    ---
+    Returns : Bool
+        True if the file no longer exists after method call
+        False otherwise
+    &#34;&#34;&#34;
+
+    if os.path.exists(file_path):
+        logging.debug(f&#34;REMOVING FILE {file_path}&#34;)
+        try:
+            os.remove(file_path)
+        except IsADirectoryError as e:
+            logging.info(f&#34;ERROR: {file_path} is a directory&#34;)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+        except OSError as e:
+            logging.info(f&#34;ERROR: {file_path} CANNOT BE REMOVED&#34;)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+            return False
+        logging.info(f&#34;FILE REMOVED&#34;)
+        return True
+    else:
+        logging.debug(f&#34;{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED&#34;)
+        return True</code></pre>
+</details>
+</dd>
+<dt id="Emails.EmailSender.get_image"><code class="name flex">
+<span>def <span class="ident">get_image</span></span>(<span>image_directory='images/email_images')</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="get-a-single-random-image-from-a-folder">Get A Single Random Image From A Folder</h2>
+<p>Params
+image_directory : Str
+The path to the file containing the images to choose from</p>
+<hr>
+<p>Returns : Str
+The path to the image chosen</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_image(image_directory=&#34;images/email_images&#34;):
+    &#34;&#34;&#34;
+    Get a single random image from a folder
+    ---
+    Params
+    image_directory : Str
+        The path to the file containing the images to choose from
+    ---
+    Returns : Str
+        The path to the image chosen
+    &#34;&#34;&#34;
+    
+    images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
+    # I want this to fail if no images present, something has gone wrong!
+    try:
+        image = random.choice(images)
+    except IndexError as e:
+        logging.info(&#34;ERROR: No images to select from!&#34;)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        exit(1)
+    return os.path.join(image_directory, image)</code></pre>
+</details>
+</dd>
+<dt id="Emails.EmailSender.get_message"><code class="name flex">
+<span>def <span class="ident">get_message</span></span>(<span>message_list_file='emails/message_list.txt')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a random message from a file containing messages
+Will Be Used To Set The Email Body</p>
+<hr>
+<p>Params
+message_list_file : Str
+The path to the file containing the messages</p>
+<hr>
+<p>Returns : Str
+A single string, one message from the message list file</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_message(message_list_file = &#34;emails/message_list.txt&#34;):
+    &#34;&#34;&#34;
+    Get a random message from a file containing messages
+    Will be used to set the email body
+    ---
+    Params
+    message_list_file : Str
+        The path to the file containing the messages
+    ---
+    Returns : Str
+        A single string, one message from the message list file 
+    &#34;&#34;&#34;
+    
+    messages = []
+    with open(message_list_file, &#34;r&#34;) as f:
+        messages = f.readlines()
+    message = random.choice(messages)
+    return message</code></pre>
+</details>
+</dd>
+<dt id="Emails.EmailSender.get_receiver_emails"><code class="name flex">
+<span>def <span class="ident">get_receiver_emails</span></span>(<span>receiver_emails_file='emails/email_list.txt')</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="get-all-of-the-receiver-email-addresses-to-send-emails-to">Get All Of The Receiver Email Addresses To Send Emails To</h2>
+<p>Params
+receiver_emails_file : Str
+The path to the file containing the receiver email addresses</p>
+<hr>
+<p>Returns : List[Str]
+A list of strings of the receiver email addresses</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_receiver_emails(receiver_emails_file = &#34;emails/email_list.txt&#34;):
+    &#34;&#34;&#34;
+    Get all of the receiver email addresses to send emails to
+    ---
+    Params
+    receiver_emails_file : Str
+        The path to the file containing the receiver email addresses
+    ---
+    Returns : List[Str]
+        A list of strings of the receiver email addresses
+    &#34;&#34;&#34;
+    
+    emails = []
+    with open(receiver_emails_file, &#34;r&#34;) as f:
+        emails = f.readlines()
+    return emails</code></pre>
+</details>
+</dd>
+<dt id="Emails.EmailSender.get_sender_login"><code class="name flex">
+<span>def <span class="ident">get_sender_login</span></span>(<span>data_json='emails/email_data.json')</span>
+</code></dt>
+<dd>
+<div class="desc"><h2 id="get-the-login-details-for-the-sender-email-account">Get The Login Details For The Sender Email Account</h2>
+<p>Params
+data_json : Str
+The path to the json file containing the sender login data
+Organized by "sender_address" and "email_password"</p>
+<hr>
+<p>Returns : 2-tuple of strings
+sender_email, password</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_sender_login(data_json = &#34;emails/email_data.json&#34;):
+    &#34;&#34;&#34;
+    Get the login details for the sender email account
+    ---
+    Params 
+    data_json : Str
+        The path to the json file containing the sender login data
+        Organized by &#34;sender_address&#34; and &#34;email_password&#34;
+    ---
+    Returns : 2-tuple of strings 
+    sender_email, password
+    &#34;&#34;&#34;
+
+    # Get the email account data to log into server
+    email_data_file = open(data_json)
+    email_data = json.load(email_data_file)
+    email_data_file.close() 
+    sender_email = email_data[&#34;sender_address&#34;]
+    password = email_data[&#34;email_password&#34;]
+    return sender_email, password</code></pre>
+</details>
+</dd>
+<dt id="Emails.EmailSender.send_email"><code class="name flex">
+<span>def <span class="ident">send_email</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Send an email to the list of email recipients, choosing a random message and image, then deleting that image to avoid duplicates</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def send_email():
+    &#34;&#34;&#34;
+    Send an email to the list of email recipients, choosing a random message and image, then deleting that image to avoid duplicates
+    &#34;&#34;&#34;
+
+    logging.info(&#34;Started email method...&#34;)
+
+    server = &#34;smtp.gmail.com&#34;,
+    port = 465
+
+    receiver_emails = get_receiver_emails()
+    message = get_message()
+    logging.info(f&#34;{message=}&#34;)
+    img_file = get_image()
+    logging.info(f&#34;{img_file=}&#34;)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
+        logging.info(&#34;Accessed email server...&#34;)
+        logging.info(&#34;Logging into server with credentials...&#34;)
+        sender_email, password = get_sender_login()
+        server.login(sender_email, password)
+        
+        logging.info(f&#34;Accessing file {img_file=}&#34;)
+        with open(img_file, &#39;rb&#39;) as f:
+            img_data = f.read()
+        logging.info(f&#34;File {img_file=} successfully loaded&#34;)
+        
+        logging.info(&#34;-&#34;*80)
+
+        for receiver_email in receiver_emails:
+            logging.info(f&#34;RECEIVER: {receiver_email}&#34;)
+            logging.info(&#34;Starting MIME generation&#34;)
+            msg = MIMEMultipart()
+            msg[&#39;Subject&#39;] = &#34;Wow! New cloud just dropped!&#34;
+            msg[&#39;From&#39;] = sender_email
+            msg[&#39;To&#39;] = receiver_email
+            logging.info(&#34;MIME msg metadata loaded&#34;)
+            text = MIMEText(message)
+            msg.attach(text)
+            image = MIMEImage(img_data, name=os.path.basename(img_file))
+            msg.attach(image)
+            logging.info(&#34;MIME msg body loaded&#34;)
+
+            logging.info(f&#34;Sending email to {receiver_email}&#34;)
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+            logging.info(&#34;Email sent successfully&#34;)
+            logging.info(&#34;-&#34;*80)
+
+    logging.info(&#34;Deleting image&#34;)
+    delete_image(img_file)
+    logging.info(&#34;Image deleted&#34;)
+    logging.info(&#34;EMAILING FINISHED&#34;)
+    logging.info(&#34;*&#34;*80)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="Emails" href="index.html">Emails</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="Emails.EmailSender.check_images_remaining" href="#Emails.EmailSender.check_images_remaining">check_images_remaining</a></code></li>
+<li><code><a title="Emails.EmailSender.delete_image" href="#Emails.EmailSender.delete_image">delete_image</a></code></li>
+<li><code><a title="Emails.EmailSender.get_image" href="#Emails.EmailSender.get_image">get_image</a></code></li>
+<li><code><a title="Emails.EmailSender.get_message" href="#Emails.EmailSender.get_message">get_message</a></code></li>
+<li><code><a title="Emails.EmailSender.get_receiver_emails" href="#Emails.EmailSender.get_receiver_emails">get_receiver_emails</a></code></li>
+<li><code><a title="Emails.EmailSender.get_sender_login" href="#Emails.EmailSender.get_sender_login">get_sender_login</a></code></li>
+<li><code><a title="Emails.EmailSender.send_email" href="#Emails.EmailSender.send_email">send_email</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
