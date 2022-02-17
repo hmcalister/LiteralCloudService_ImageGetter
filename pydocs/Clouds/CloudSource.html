@@ -105,6 +105,8 @@ class CloudSource:
         image_name : str or None (optional, defaults to None)
             The name to save this image under. If left None, the default name is used
             The default name is date + self.name 
+        directory : str (optional, defaults to &#34;images/current_downloads&#34;)
+            The directory to save the download to
         ---
         Returns : bool
             True if image is successfully downloaded and cropped, false otherwise
@@ -113,7 +115,7 @@ class CloudSource:
         try:
             logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
             if image_name == None:
-                image_name = f&#34;{directory}{str(self)}.png&#34;
+                image_name = os.path.join(directory, f&#34;{str(self)}.png&#34;)
 
             logging.debug(f&#34;{image_name=}&#34;)
             logging.debug(f&#34;{self.url=}&#34;)
@@ -204,7 +206,7 @@ class CloudSource:
         # Get hour and minute of this source
         hour = int(self.time.split(&#34;:&#34;)[0])
         minute = int(self.time.split(&#34;:&#34;)[1])
-        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0)
+        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         # If our target time is in the past, we must make the target time in the future by adding a day
         if self.target_time&lt;now:
             self.target_time += datetime.timedelta(days=1)
@@ -227,7 +229,7 @@ def get_cloud_sources(clouds_data_file:str = &#34;Clouds/CloudSourcesData.json&#
     # cloud_data = data_file.readlines()
     cloud_data = json.load(data_file)
     data_file.close()
-    logging.info(cloud_data)
+    logging.debug(cloud_data)
     logging.info(&#34;DATA LOADED&#34;)
     logging.info(&#34;-&#34;*80)
 
@@ -280,7 +282,7 @@ def delete_file(file_path:str)-&gt;bool:
         logging.debug(f&#34;{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED&#34;)
         return True
 
-def archive_images(backup_dir=None):
+def archive_images(backup_dir=None, current_dir=&#34;images/current_downloads&#34;):
     &#34;&#34;&#34;
     Moves the images directory to a backup directory.
     Intended to be run after collecting from all sources processing.
@@ -290,6 +292,9 @@ def archive_images(backup_dir=None):
     backup_dir : str, optional (defaults to None)
         The path to move the images to
         If None, defaults to images/images_archive/{datetime.datetime.now().date()}
+
+    current_dir : str (optional, defaults to &#34;images/current_downloads&#34;)
+        The directory in which the images to archive currently reside
     &#34;&#34;&#34;
     
     if backup_dir==None:
@@ -297,8 +302,8 @@ def archive_images(backup_dir=None):
 
     try:
         os.makedirs(backup_dir)
-        for file_name in os.listdir(&#34;images&#34;):
-            shutil.move(os.path.join(&#34;images&#34;, file_name), backup_dir)
+        for file_name in os.listdir(current_dir):
+            shutil.move(os.path.join(current_dir, file_name), backup_dir)
     except Exception as e:
         logging.info(&#34;ERROR: Failed to move images to backup folder!&#34;)
         logging.debug(f&#34;{e=}&#34;)
@@ -364,7 +369,7 @@ def wget_sources():
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="Clouds.CloudSource.archive_images"><code class="name flex">
-<span>def <span class="ident">archive_images</span></span>(<span>backup_dir=None)</span>
+<span>def <span class="ident">archive_images</span></span>(<span>backup_dir=None, current_dir='images/current_downloads')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Moves the images directory to a backup directory.
@@ -374,12 +379,14 @@ In Future May Add Option For Compression As Well</p>
 <p>Params:
 backup_dir : str, optional (defaults to None)
 The path to move the images to
-If None, defaults to images/images_archive/{datetime.datetime.now().date()}</p></div>
+If None, defaults to images/images_archive/{datetime.datetime.now().date()}</p>
+<p>current_dir : str (optional, defaults to "images/current_downloads")
+The directory in which the images to archive currently reside</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def archive_images(backup_dir=None):
+<pre><code class="python">def archive_images(backup_dir=None, current_dir=&#34;images/current_downloads&#34;):
     &#34;&#34;&#34;
     Moves the images directory to a backup directory.
     Intended to be run after collecting from all sources processing.
@@ -389,6 +396,9 @@ If None, defaults to images/images_archive/{datetime.datetime.now().date()}</p><
     backup_dir : str, optional (defaults to None)
         The path to move the images to
         If None, defaults to images/images_archive/{datetime.datetime.now().date()}
+
+    current_dir : str (optional, defaults to &#34;images/current_downloads&#34;)
+        The directory in which the images to archive currently reside
     &#34;&#34;&#34;
     
     if backup_dir==None:
@@ -396,8 +406,8 @@ If None, defaults to images/images_archive/{datetime.datetime.now().date()}</p><
 
     try:
         os.makedirs(backup_dir)
-        for file_name in os.listdir(&#34;images&#34;):
-            shutil.move(os.path.join(&#34;images&#34;, file_name), backup_dir)
+        for file_name in os.listdir(current_dir):
+            shutil.move(os.path.join(current_dir, file_name), backup_dir)
     except Exception as e:
         logging.info(&#34;ERROR: Failed to move images to backup folder!&#34;)
         logging.debug(f&#34;{e=}&#34;)
@@ -488,7 +498,7 @@ A list of all of the cloud sources specified</p></div>
     # cloud_data = data_file.readlines()
     cloud_data = json.load(data_file)
     data_file.close()
-    logging.info(cloud_data)
+    logging.debug(cloud_data)
     logging.info(&#34;DATA LOADED&#34;)
     logging.info(&#34;-&#34;*80)
 
@@ -657,6 +667,8 @@ e.g. '10:24' or '23:11'</p></div>
         image_name : str or None (optional, defaults to None)
             The name to save this image under. If left None, the default name is used
             The default name is date + self.name 
+        directory : str (optional, defaults to &#34;images/current_downloads&#34;)
+            The directory to save the download to
         ---
         Returns : bool
             True if image is successfully downloaded and cropped, false otherwise
@@ -665,7 +677,7 @@ e.g. '10:24' or '23:11'</p></div>
         try:
             logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
             if image_name == None:
-                image_name = f&#34;{directory}{str(self)}.png&#34;
+                image_name = os.path.join(directory, f&#34;{str(self)}.png&#34;)
 
             logging.debug(f&#34;{image_name=}&#34;)
             logging.debug(f&#34;{self.url=}&#34;)
@@ -756,7 +768,7 @@ e.g. '10:24' or '23:11'</p></div>
         # Get hour and minute of this source
         hour = int(self.time.split(&#34;:&#34;)[0])
         minute = int(self.time.split(&#34;:&#34;)[1])
-        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0)
+        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         # If our target time is in the past, we must make the target time in the future by adding a day
         if self.target_time&lt;now:
             self.target_time += datetime.timedelta(days=1)
@@ -794,7 +806,9 @@ A debug string of this objects attributes</p></div>
 <p>Params:
 image_name : str or None (optional, defaults to None)
 The name to save this image under. If left None, the default name is used
-The default name is date + self.name </p>
+The default name is date + self.name
+directory : str (optional, defaults to "images/current_downloads")
+The directory to save the download to</p>
 <hr>
 <p>Returns : bool
 True if image is successfully downloaded and cropped, false otherwise</p></div>
@@ -810,6 +824,8 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
     image_name : str or None (optional, defaults to None)
         The name to save this image under. If left None, the default name is used
         The default name is date + self.name 
+    directory : str (optional, defaults to &#34;images/current_downloads&#34;)
+        The directory to save the download to
     ---
     Returns : bool
         True if image is successfully downloaded and cropped, false otherwise
@@ -818,7 +834,7 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
     try:
         logging.info(f&#34;STARTING {self.name} DOWNLOAD&#34;)
         if image_name == None:
-            image_name = f&#34;{directory}{str(self)}.png&#34;
+            image_name = os.path.join(directory, f&#34;{str(self)}.png&#34;)
 
         logging.debug(f&#34;{image_name=}&#34;)
         logging.debug(f&#34;{self.url=}&#34;)
@@ -928,7 +944,7 @@ A datetime object representing the time at which this source should be triggered
     # Get hour and minute of this source
     hour = int(self.time.split(&#34;:&#34;)[0])
     minute = int(self.time.split(&#34;:&#34;)[1])
-    self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0)
+    self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
     # If our target time is in the past, we must make the target time in the future by adding a day
     if self.target_time&lt;now:
         self.target_time += datetime.timedelta(days=1)
