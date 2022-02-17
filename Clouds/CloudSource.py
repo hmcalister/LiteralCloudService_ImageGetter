@@ -69,7 +69,7 @@ class CloudSource:
 
         return f"CloudSource: {self.name}, URL: {self.url}, crop_coords: {self.crop_coords}, Time: {self.time}"
 
-    def get_image(self, image_name:str = None, directory:str="images/current_downloads/") -> bool:
+    def get_image(self, image_name:str = None, directory:str="images/current_downloads") -> bool:
         """
         Get the most recent image from this cloud source, crop it, and save it
         ---
@@ -77,6 +77,8 @@ class CloudSource:
         image_name : str or None (optional, defaults to None)
             The name to save this image under. If left None, the default name is used
             The default name is date + self.name 
+        directory : str (optional, defaults to "images/current_downloads")
+            The directory to save the download to
         ---
         Returns : bool
             True if image is successfully downloaded and cropped, false otherwise
@@ -85,7 +87,7 @@ class CloudSource:
         try:
             logging.info(f"STARTING {self.name} DOWNLOAD")
             if image_name == None:
-                image_name = f"{directory}{str(self)}.png"
+                image_name = os.path.join(directory, f"{str(self)}.png")
 
             logging.debug(f"{image_name=}")
             logging.debug(f"{self.url=}")
@@ -252,7 +254,7 @@ def delete_file(file_path:str)->bool:
         logging.debug(f"{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED")
         return True
 
-def archive_images(backup_dir=None):
+def archive_images(backup_dir=None, current_dir="images/current_downloads"):
     """
     Moves the images directory to a backup directory.
     Intended to be run after collecting from all sources processing.
@@ -262,6 +264,9 @@ def archive_images(backup_dir=None):
     backup_dir : str, optional (defaults to None)
         The path to move the images to
         If None, defaults to images/images_archive/{datetime.datetime.now().date()}
+
+    current_dir : str (optional, defaults to "images/current_downloads")
+        The directory in which the images to archive currently reside
     """
     
     if backup_dir==None:
@@ -269,8 +274,8 @@ def archive_images(backup_dir=None):
 
     try:
         os.makedirs(backup_dir)
-        for file_name in os.listdir("images"):
-            shutil.move(os.path.join("images", file_name), backup_dir)
+        for file_name in os.listdir(current_dir):
+            shutil.move(os.path.join(current_dir, file_name), backup_dir)
     except Exception as e:
         logging.info("ERROR: Failed to move images to backup folder!")
         logging.debug(f"{e=}")
