@@ -1,4 +1,5 @@
 import datetime
+import time
 import urllib
 import logging
 import wget
@@ -13,7 +14,11 @@ from PIL import Image, UnidentifiedImageError
 
 # To get around dodgy webcams with expired SSL certificates
 ssl._create_default_https_context = ssl._create_unverified_context
-logging.basicConfig(level=logging.INFO)
+logging.Formatter.converter = time.gmtime
+logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-cloud-sources.log", 
+    format='%(asctime)s %(levelname)-8s %(message)s',
+    level=logging.INFO,
+    datefmt='%Y-%m-%d %H:%M:%S')
 
 class CloudSource:
     """
@@ -64,7 +69,7 @@ class CloudSource:
 
         return f"CloudSource: {self.name}, URL: {self.url}, crop_coords: {self.crop_coords}, Time: {self.time}"
 
-    def get_image(self, image_name:str = None, directory:str="images/") -> bool:
+    def get_image(self, image_name:str = None, directory:str="images/current_downloads") -> bool:
         """
         Get the most recent image from this cloud source, crop it, and save it
         ---
@@ -136,7 +141,6 @@ class CloudSource:
             logging.debug(f"{e=}")
             logging.debug(f"{type(e)=}")
             return False
-            return False           
         except SystemError as e:
             logging.info(f"ERROR: System error during save of {self.name}! Check config and retry")
             delete_file(image_name)
@@ -148,6 +152,7 @@ class CloudSource:
             delete_file(image_name)
             logging.info(f"{e=}")
             logging.info(f"{type(e)=}")
+            return False           
         return True
 
     def set_target_time(self, now:datetime.datetime) -> datetime.datetime:
@@ -177,9 +182,20 @@ class CloudSource:
             self.target_time += datetime.timedelta(days=1)
         return self.target_time
 
-def get_cloud_sources() -> List[CloudSource]:
+def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> List[CloudSource]:
+    """
+    Get all cloud sources specified in a data file.
+    See the readme for specification
+    ---
+    Params
+    clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
+        The json file to get the cloud source from
+    ---
+    Returns : List[CloudSource]
+        A list of all of the cloud sources specified
+    """
     logging.info("LOAD DATA")
-    data_file = open("Clouds/CloudSourcesData.json")
+    data_file = open(clouds_data_file)
     # cloud_data = data_file.readlines()
     cloud_data = json.load(data_file)
     data_file.close()
@@ -245,11 +261,11 @@ def archive_images(backup_dir=None):
     Params:
     backup_dir : str, optional (defaults to None)
         The path to move the images to
-        If None, defaults to images_archive/{datetime.datetime.now().date()}
+        If None, defaults to images/images_archive/{datetime.datetime.now().date()}
     """
     
     if backup_dir==None:
-        backup_dir=f"images_archive/{datetime.datetime.utcnow().date()}"
+        backup_dir=f"images/images_archive/{datetime.datetime.utcnow().date()}"
 
     try:
         os.makedirs(backup_dir)
@@ -260,5 +276,53 @@ def archive_images(backup_dir=None):
         logging.debug(f"{e=}")
         logging.debug(f"{type(e)=}")
 
-if __name__ == "__main__":
-    logging.getLogger().setLevel(level=logging.DEBUG)
+def get_from_all_sources():
+    """
+    For all of the cloud sources in the cloud source json file, get the image from that source for this day.
+    This is currently very static, intended to get the job done quickly. In future this may be parameterized.
+    """
+
+    cloud_sources:List[CloudSource] = get_cloud_sources()
+    logging.debug(cloud_sources)
+    logging.info("-"*80)
+
+    logging.info("GET TARGET TIMES")
+    for source in cloud_sources:
+        now = datetime.datetime.utcnow()
+        logging.debug(f"{now=}")
+        logging.debug(f"{source=}")
+        source.set_target_time(now)
+
+    logging.info("TARGET TIMES CREATED")
+    logging.info("-"*80)
+    logging.info("SORTING SOURCES")
+    cloud_sources.sort(key = lambda x:x.target_time)
+    logging.info("SOURCES SORTED")
+    for source in cloud_sources:
+        logging.info(f"{str(source):<50}{source.target_time}")
+
+    logging.info("-"*80)
+
+    logging.info("START GET FROM SOURCES")
+    for source in cloud_sources:
+        logging.info(f"{source=}")
+        logging.info(f"CURRENT TIME (LOCAL): {datetime.datetime.now()}")
+        logging.info(f"CURRENT TIME (UTC): {datetime.datetime.utcnow()}")
+        now = datetime.datetime.utcnow()
+        delta = source.target_time - now
+        if delta.total_seconds() > 0:
+            logging.info(f"SLEEPING FOR {delta.total_seconds()}s")
+            logging.info(f"SLEEP FINISH SCHEDULED FOR (LOCAL): {datetime.datetime.now()+delta}")
+            logging.info(f"SLEEP FINISH SCHEDULED FOR (UTC): {datetime.datetime.utcnow()+delta}")
+            time.sleep(delta.total_seconds())
+        else:
+            logging.info(f"NO SLEEP NEEDED")
+        logging.info(f"GET {str(source)}")
+        source.get_image()
+        logging.info("GET SUCCESSFUL")
+        logging.info("-"*80)
+    logging.info("GOT ALL SOURCES SUCCESSFULLY")
+    logging.info("-"*80)
+    logging.info("MOVE IMAGES TO BACKUP FOLDER")
+    archive_images()
+    logging.info("-"*80)
