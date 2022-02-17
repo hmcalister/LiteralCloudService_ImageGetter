@@ -2,15 +2,16 @@ import logging
 import datetime
 import time
 logging.Formatter.converter = time.gmtime
-logging.basicConfig(filename=f"logs/{str(datetime.date.today())}.log", 
+logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}.log", 
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
-from typing import List
+import shutil
 import json
+from typing import List
 from time import sleep
-from Clouds.CloudSource import CloudSource, get_cloud_sources
+from Clouds.CloudSource import CloudSource, get_cloud_sources, archive_images
 
 
 logging.info("-"*80)
@@ -28,7 +29,6 @@ data_file.close()
 logging.info(cloud_data)
 logging.info("DATA LOADED")
 logging.info("-"*80)
-
 
 def test_url_wget():
     logging.info("-"*80)
@@ -84,3 +84,7 @@ def test_time_wget():
         logging.info("-"*80)
     logging.info("GOT ALL SOURCES SUCCESSFULLY")
     logging.info("-"*80)
+    logging.info("MOVE IMAGES TO BACKUP FOLDER")
+    archive_images()
+    logging.info("-"*80)
+    

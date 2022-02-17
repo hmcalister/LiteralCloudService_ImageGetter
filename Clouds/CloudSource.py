@@ -5,8 +5,10 @@ import wget
 import json
 import os
 import ssl
+import shutil
 from ast import literal_eval
 from typing import List, Tuple
+from urllib.error import ContentTooShortError
 from PIL import Image, UnidentifiedImageError
 
 # To get around dodgy webcams with expired SSL certificates
@@ -75,17 +77,16 @@ class CloudSource:
             True if image is successfully downloaded and cropped, false otherwise
         """
 
-        logging.info(f"STARTING {self.name} DOWNLOAD")
-        if image_name == None:
-            image_name = f"{directory}{str(self)}.png"
-
-        logging.debug(f"{image_name=}")
-        logging.debug(f"{self.url=}")
-
-        delete_file(image_name)
-
         try:
+            logging.info(f"STARTING {self.name} DOWNLOAD")
+            if image_name == None:
+                image_name = f"{directory}{str(self)}.png"
+
+            logging.debug(f"{image_name=}")
+            logging.debug(f"{self.url=}")
+            delete_file(image_name)
             wget.download(self.url, image_name)
+            logging.info("DOWNLOAD COMPLETE")
         except ValueError as e:
             logging.info(f"ERROR: ValueError found during download of {self.name}! URL form not recognized")
             delete_file(image_name)
@@ -98,34 +99,55 @@ class CloudSource:
             logging.debug(f"{e=}")
             logging.debug(f"{type(e)=}")
             return False
+        except ContentTooShortError as e:
+            logging.info(f"ERROR: Content too short during download of {self.name}! Check URL and retry")
+            delete_file(image_name)
+            logging.debug(f"{e=}")
+            logging.debug(f"{type(e)=}")
+            return False
+        except Exception as e:
+            logging.info(f"ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry")
+            delete_file(image_name)
+            logging.debug(f"{e=}")
+            logging.debug(f"{type(e)=}")
+            return False
+
         try:
+            logging.info("CROPPING IMAGE")
+            logging.debug(f"Opening {image_name} with PIL")
             im = Image.open(image_name)
+            logging.debug(f"Source Dimensions: {im.size}")
+            logging.debug(f"Target Dimensions: {self.crop_coords=}")
+            cropped_im = im.crop(self.crop_coords)
+            logging.debug("Image cropped, saving image...")
+            cropped_im.save(image_name)
             im.close()
+            cropped_im.close()
+            logging.info("IMAGE SAVED")
         except UnidentifiedImageError as e: 
             logging.info(f"ERROR: Unidentified image from source {self.name}! URL may be broken")
             delete_file(image_name)
             logging.debug(f"{e=}")
             logging.debug(f"{type(e)=}")
             return False
-
-        logging.info("DOWNLOAD COMPLETE")
-        logging.info("CROPPING IMAGE")
-        logging.debug(f"Opening {image_name} with PIL")
-        im = Image.open(image_name)
-        logging.debug(f"Source Dimensions: {im.size}")
-        logging.debug(f"Target Dimensions: {self.crop_coords=}")
-        cropped_im = im.crop(self.crop_coords)
-        logging.debug("Image cropped, saving image...")
-        try:
-            cropped_im.save(image_name)
+        except FileNotFoundError as e:
+            logging.info(f"ERROR: File {self.name} not found! Download may have failed")
+            delete_file(image_name)
+            logging.debug(f"{e=}")
+            logging.debug(f"{type(e)=}")
+            return False
+            return False           
         except SystemError as e:
             logging.info(f"ERROR: System error during save of {self.name}! Check config and retry")
             delete_file(image_name)
             logging.debug(f"{e=}")
             logging.debug(f"{type(e)=}")
             return False
-        logging.info("IMAGE SAVED")
-
+        except Exception as e:
+            logging.info(f"ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry")
+            delete_file(image_name)
+            logging.info(f"{e=}")
+            logging.info(f"{type(e)=}")
         return True
 
     def set_target_time(self, now:datetime.datetime) -> datetime.datetime:
@@ -213,6 +235,30 @@ def delete_file(file_path:str)->bool:
     else:
         logging.debug(f"{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED")
         return True
+
+def archive_images(backup_dir=None):
+    """
+    Moves the images directory to a backup directory.
+    Intended to be run after collecting from all sources processing.
+    In future may add option for compression as well
+    ---
+    Params:
+    backup_dir : str, optional (defaults to None)
+        The path to move the images to
+        If None, defaults to images_archive/{datetime.datetime.now().date()}
+    """
+    
+    if backup_dir==None:
+        backup_dir=f"images_archive/{datetime.datetime.utcnow().date()}"
+
+    try:
+        os.makedirs(backup_dir)
+        for file_name in os.listdir("images"):
+            shutil.move(os.path.join("images", file_name), backup_dir)
+    except Exception as e:
+        logging.info("ERROR: Failed to move images to backup folder!")
+        logging.debug(f"{e=}")
+        logging.debug(f"{type(e)=}")
 
 if __name__ == "__main__":
     logging.getLogger().setLevel(level=logging.DEBUG)

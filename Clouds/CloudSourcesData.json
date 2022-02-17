@@ -1,4 +1,5 @@
 {
+    "Version" : 1,
     "CloudSources" : [
         {
             "name": "Hobart-Australia",
@@ -10,13 +11,13 @@
             "name": "Bauang-Philippines",
             "url": "https://admin.meteobridge.com/cam/57287b66aef052a0bb33df9e62f6ff05/camplus.jpg",
             "crop_coords": "(0,50,999,500)",
-            "time_list": ["23:00", "20:00", "15:00", "10:30"]
+            "time_list": ["22:30", "02:00", "06:00", "10:00"]
         },
         {
             "name": "Stavrakia-Crete",
             "url": "http://penteli.meteo.gr/stations/stavrakia/webcam.jpg",
             "crop_coords": "(0,100,1280,720)",
-            "time_list": ["06:00", "11:00", "13:00", "17:00"]
+            "time_list": ["05:00", "11:00", "13:00", "16:30"]
         },
         {
             "name": "Kalahari-Namibia",
@@ -76,18 +77,18 @@
             "name": "Guaruja-Brazil",
             "url": "https://www.centraldotempo.com.br/data/robot/robot3/robot3.jpg",
             "crop_coords": "(0,0,1280,650)",
-            "time_list": ["09:30", "12:00", "16:00", "22:00"]
+            "time_list": ["11:00", "13:00", "16:00", "21:30"]
         },
         {
             "name": "Guadalajara-Mexico",
             "url": "http://www.webcamsdemexico.net/guadalajara1/live.jpg",
             "crop_coords": "(0,60,800,600)",
-            "time_list": ["13:30", "17:00", "22:00", "01:00"]
+            "time_list": ["13:30", "16:30", "21:30", "00:30"]
         },
         {
             "name": "RevolutionMonument-Mexico",
             "url": "https://webcamsdemexico.net/mexicodf7/live.jpg",
-            "crop_coords": "(0,100, 800, 600)",
+            "crop_coords": "(0,80, 800, 600)",
             "time_list": ["13:00", "17:00", "22:00", "01:00"]
         },
         {
@@ -100,7 +101,7 @@
             "name": "Sliema-Malta",
             "url": "http://www.maltaweather.com/stream.jpg",
             "crop_coords": "(0,32,854,480)",
-            "time_list": ["06:00", "10:00", "14:00", "16:30"]
+            "time_list": ["06:15", "10:15", "14:15", "16:45"]
         },
         {
             "name": "Alicante-Spain",
@@ -112,25 +113,103 @@
             "name": "Bulandshofoi-Iceland",
             "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/bulandshofdi_1.jpg",
             "crop_coords": "(0,30,640,450)",
-            "time_list": ["09:00", "12:00", "15:00", "18:00"]
+            "time_list": ["09:10", "12:10", "15:10", "18:10"]
         },
         {
             "name": "Siglufjaroarvegur-Iceland",
-            "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/siglufjardarvegur_3.jpg",
-            "crop_coords": "(0,30,640,450)",
-            "time_list": ["09:00", "12:00", "15:00", "18:00"]
+            "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/siglufjardarvegur_1.jpg",
+            "crop_coords": "(0,30,610,400)",
+            "time_list": ["09:20", "12:20", "15:20", "18:20"]
         },
         {
             "name": "Bolungarvikurgong-Iceland",
             "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/bolungarvikurgong_1.jpg",
             "crop_coords": "(0,30,640,450)",
-            "time_list": ["09:00", "12:00", "15:00", "18:00"]
+            "time_list": ["09:30", "12:30", "15:30", "18:30"]
         },
         {
             "name": "Blikdalsa-Iceland",
             "url": "https://www.vegagerdin.is/vgdata/vefmyndavelar/blikdalsa_1.jpg",
             "crop_coords": "(0,30,640,450)",
             "time_list": ["09:00", "12:00", "15:00", "18:00"]
+        },
+        {
+            "name": "CamelbackMountain-USA",
+            "url": "https://www.phoenixvis.net/CreateMain.aspx?t=main&p=/images/photos-main/CAME1.jpg",
+            "crop_coords": "(0,0,800,420)",
+            "time_list": ["14:10", "18:10", "21:10", "01:10"]
+        },
+        {
+            "name": "SuperstitionMountains-USA",
+            "url": "https://www.phoenixvis.net/CreateMain.aspx?t=main&p=/images/photos-main/SUPM1.jpg",
+            "crop_coords": "(0,0,800,250)",
+            "time_list": ["14:20", "18:20", "21:20", "01:20"]
+        },
+        {
+            "name": "WhiteTankMountains-USA",
+            "url": "https://www.phoenixvis.net/CreateMain.aspx?t=main&p=/images/photos-main/WHTM1.jpg",
+            "crop_coords": "(0,0,800,250)",
+            "time_list": ["14:00", "18:00", "21:00", "01:00"]
+        },
+        {
+            "name": "PraiaDaVitoria-Portugal",
+            "url": "http://www.climaat.angra.uac.pt/weathercams/0012.jpg",
+            "crop_coords": "(30,30,650,490)",
+            "time_list": ["08:30", "12:30", "15:30", "19:30"]
+        },
+        {
+            "name": "HampsteadHeath-UK",
+            "url": "http://nw3weather.co.uk/skycam_small.jpg",
+            "crop_coords": "(0,0,864,550)",
+            "time_list": ["07:00", "10:30", "13:30", "17:30"]
+        },
+        {
+            "name": "Frankfurt-Germany",
+            "url": "https://www.mainhattan-webcam.de/live/frankfurt01_1920.JPG",
+            "crop_coords": "(0,0,1920,1280)",
+            "time_list": ["06:30", "10:00", "14:00", "17:00"]
+        },
+        {
+            "name": "SanFrancisco-USA",
+            "url": "https://castrocam.net/img/castrocam.jpg",
+            "crop_coords": "(250, 20, 1280, 960)",
+            "time_list": ["15:00", "19:00", "23:00", "02:00"]
+        },
+        {
+            "name": "Boulder-USA",
+            "url": "https://boulderflatironcam.com/bfc/bfcsc.jpg",
+            "crop_coords": "(0,0,1920,1060)",
+            "time_list": ["14:00", "18:30", "22:30", "01:00"]
+        },
+        {
+            "name": "ChimneySouthTaranaki-NZ",
+            "url": "https://primo.nz/webcameras/snapshot_chimney_sth.jpg",
+            "crop_coords": "(0,200,3840,2160)",
+            "time_list": ["18:00", "22:30", "03:30", "07:30"]
+        },
+        {
+            "name": "BridgemanTaranaki-NZ",
+            "url": "https://www.primo.nz/webcameras/snapshot_bridgeman.jpg",
+            "crop_coords": "(0,100,1920,1080)",
+            "time_list": ["18:15", "22:45", "03:45", "07:15"]
+        },
+        {
+            "name": "TuahuTaranaki-NZ",
+            "url": "https://www.primo.nz/webcameras/snapshot_tuahu.jpg",
+            "crop_coords": "(0,100,1920,1080)",
+            "time_list": ["18:30", "22:00", "03:00", "07:00"]
+        },
+        {
+            "name": "MidhirstTaranaki-NZ",
+            "url": "https://www.primo.nz/webcameras/snapshot_midhirst.jpg",
+            "crop_coords": "(0,200,3840,2160)",
+            "time_list": ["18:20", "22:15", "03:15", "07:20"]
+        },
+        {
+            "name": "MangawheroTaranaki-NZ",
+            "url": "https://www.primo.nz/webcameras/snapshot_mangawhero.jpg",
+            "crop_coords": "(0,100,1920,1080)",
+            "time_list": ["18:10", "22:20", "03:20", "07:10"]
         }
     ]    
 }
