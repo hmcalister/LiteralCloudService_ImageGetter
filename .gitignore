@@ -1,6 +1,7 @@
 __pycache__
-images/*
+images/*/*
 images_backup/*
+emails/email_list.*
 logs/*
 *.key
 *.pub
