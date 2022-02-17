@@ -173,7 +173,7 @@
             "name": "SanFrancisco-USA",
             "url": "https://castrocam.net/img/castrocam.jpg",
             "crop_coords": "(250, 20, 1280, 960)",
-            "time_list": ["15:00", "19:00", "23:00", "02:00"]
+            "time_list": ["15:00", "19:00", "23:15", "02:00"]
         },
         {
             "name": "Boulder-USA",
