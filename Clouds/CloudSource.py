@@ -69,7 +69,7 @@ class CloudSource:
 
         return f"CloudSource: {self.name}, URL: {self.url}, crop_coords: {self.crop_coords}, Time: {self.time}"
 
-    def get_image(self, image_name:str = None, directory:str="images/current_downloads") -> bool:
+    def get_image(self, image_name:str = None, directory:str="images/current_downloads/") -> bool:
         """
         Get the most recent image from this cloud source, crop it, and save it
         ---
@@ -176,7 +176,7 @@ class CloudSource:
         # Get hour and minute of this source
         hour = int(self.time.split(":")[0])
         minute = int(self.time.split(":")[1])
-        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0)
+        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         # If our target time is in the past, we must make the target time in the future by adding a day
         if self.target_time<now:
             self.target_time += datetime.timedelta(days=1)
@@ -199,7 +199,7 @@ def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> 
     # cloud_data = data_file.readlines()
     cloud_data = json.load(data_file)
     data_file.close()
-    logging.info(cloud_data)
+    logging.debug(cloud_data)
     logging.info("DATA LOADED")
     logging.info("-"*80)
 
