@@ -23,7 +23,7 @@ logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-clo
 class CloudSource:
     """
     An object that holds information on a cloud source (a live webcam).
-    
+
     This includes the URL to the webcam (to wget from) and the coords to crop at
     """
 
@@ -354,8 +354,10 @@ def wget_sources():
         else:
             logging.info(f"NO SLEEP NEEDED")
         logging.info(f"GET {str(source)}")
-        source.get_image()
-        logging.info("GET SUCCESSFUL")
+        if source.get_image():
+            logging.info("GET SUCCESSFUL")
+        else:
+            logging.info("GET FAILED")
         logging.info("-"*80)
     logging.info("GOT ALL SOURCES SUCCESSFULLY")
     logging.info("-"*80)
