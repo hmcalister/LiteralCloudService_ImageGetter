@@ -117,7 +117,25 @@ def get_image(image_directory="images/email_images"):
         logging.debug(f"{e=}")
         logging.debug(f"{type(e)=}")
         exit(1)
-    return os.path.join(image_directory, image)
+
+    orig_path = os.path.join(image_directory, image)
+    logging.info(f"Selected image {orig_path}")
+
+    try:
+        logging.info(f"Renaming {os.path.join(image_directory, image)} to {os.path.join(image_directory,'cloud.png')}")
+        os.rename(orig_path, os.path.join(image_directory,"cloud.png"))
+    except FileExistsError as e:
+        logging.info(f"ERROR: Destination {os.path.join(image_directory,'cloud.png')} already exists!")
+        logging.debug(f"{e=}")
+        logging.debug(f"{type(e)=}")
+        return orig_path
+    except Exception as e:
+        logging.info("ERROR: An unexpected error occurred during image renaming!")
+        logging.debug(f"{e=}")
+        logging.debug(f"{type(e)=}")
+        exit(1)
+
+    return os.path.join(image_directory,'cloud.png')
 
 def delete_image(file_path):
     """
