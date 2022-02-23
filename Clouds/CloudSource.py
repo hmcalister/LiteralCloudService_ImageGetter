@@ -206,8 +206,6 @@ def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> 
     """
     Get all cloud sources specified in a data file.
 
-    See the readme for specification
-
     ---
 
     Params
