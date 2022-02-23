@@ -27,6 +27,7 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">import smtplib, ssl, os, logging, random, datetime, json, time
+from dataclasses import dataclass
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
@@ -37,8 +38,6 @@ logging.basicConfig(filename=f&#34;logs/{str(datetime.datetime.utcnow().date())}
     level=logging.INFO,
     datefmt=&#39;%Y-%m-%d %H:%M:%S&#39;)
 
-ADMIN_EMAIL = &#34;haydenmcalister49@gmail.com&#34;
-
 logging.info(&#34;-&#34;*80)
 logging.info(&#34;*&#34;*80)
 logging.info(f&#34;SCRIPT START AT LOCAL {datetime.datetime.now()}&#34;)
@@ -46,7 +45,43 @@ logging.info(f&#34;SCRIPT START AT UTC {datetime.datetime.utcnow()}&#34;)
 logging.info(&#34;*&#34;*80)
 logging.info(&#34;-&#34;*80)
 
-def get_sender_login(data_json = &#34;emails/email_data.json&#34;):
+@dataclass
+class Receiver:
+    &#34;&#34;&#34;
+    A dataclass to hold information about a particular receiver
+    &#34;&#34;&#34;
+
+    address: str
+    random_message: bool
+    attach_original_name: bool
+
+
+def get_admin_emails(email_data_file = &#34;Emails/email_list.json&#34;):
+    &#34;&#34;&#34;
+    Get the admin addresses from the email data file
+
+    ---
+
+    Params
+
+    email_data_file : Str, optional (defaults to &#34;Emails/email_list.json&#34;)
+        The location of the email data json file
+    ---
+
+    Returns : List[str]
+        A list of email addresses of admins
+    &#34;&#34;&#34;
+   
+    logging.info(&#34;LOAD ADMIN ADDRESSES&#34;)
+    data_file = open(email_data_file)
+    email_data = json.load(data_file)
+    data_file.close()
+    admins = email_data[&#34;admins&#34;]
+    logging.info(admins)
+    logging.info(&#34;ADMINS LOADED&#34;)
+    return admins
+
+def get_sender_login(data_json = &#34;emails/login_data.json&#34;):
     &#34;&#34;&#34;
     Get the login details for the sender email account
 
@@ -72,7 +107,7 @@ def get_sender_login(data_json = &#34;emails/email_data.json&#34;):
     password = email_data[&#34;email_password&#34;]
     return sender_email, password
 
-def get_receiver_emails(receiver_emails_file = &#34;emails/email_list.txt&#34;):
+def get_receivers(receiver_emails_file = &#34;emails/email_list.json&#34;):
     &#34;&#34;&#34;
     Get all of the receiver email addresses to send emails to
 
@@ -85,14 +120,29 @@ def get_receiver_emails(receiver_emails_file = &#34;emails/email_list.txt&#34;):
 
     ---
 
-    Returns : List[Str]
-        A list of strings of the receiver email addresses
+    Returns : List[Receiver]
+        A list of receiver data objects representing receivers
     &#34;&#34;&#34;
     
-    emails = []
-    with open(receiver_emails_file, &#34;r&#34;) as f:
-        emails = f.readlines()
-    return emails
+    logging.info(&#34;LOAD RECEIVER ADDRESSES&#34;)
+    data_file = open(receiver_emails_file)
+    email_data = json.load(data_file)
+    data_file.close()
+    receivers = []
+    for receiver_json in email_data[&#34;receivers&#34;]:
+        try:
+            receivers.append(Receiver(
+                receiver_json[&#34;address&#34;], 
+                bool(receiver_json[&#34;random_message&#34;]),
+                bool(receiver_json[&#34;attach_original_name&#34;])))
+        except Exception as e:
+            logging.info(f&#34;ERROR: {receiver_json} failed to parse into Receiver object&#34;)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+
+    logging.info(receivers)
+    logging.info(&#34;RECEIVERS LOADED&#34;)
+    return receivers
 
 def get_message(message_list_file = &#34;emails/message_list.txt&#34;):
     &#34;&#34;&#34;
@@ -132,20 +182,39 @@ def get_image(image_directory=&#34;images/email_images&#34;):
 
     ---
 
-    Returns : Str
-        The path to the image chosen
+    Returns : (Str, Str)
+        The path to the image chosen, and the original image name (without extension)
     &#34;&#34;&#34;
     
     images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
     # I want this to fail if no images present, something has gone wrong!
     try:
         image = random.choice(images)
+        orig_image_name = image
     except IndexError as e:
         logging.info(&#34;ERROR: No images to select from!&#34;)
         logging.debug(f&#34;{e=}&#34;)
         logging.debug(f&#34;{type(e)=}&#34;)
         exit(1)
-    return os.path.join(image_directory, image)
+
+    orig_path = os.path.join(image_directory, image)
+    logging.info(f&#34;Selected image {orig_path}&#34;)
+
+    try:
+        logging.info(f&#34;Renaming {os.path.join(image_directory, image)} to {os.path.join(image_directory,&#39;cloud.png&#39;)}&#34;)
+        os.replace(orig_path, os.path.join(image_directory,&#34;cloud.png&#34;))
+    except FileExistsError as e:
+        logging.info(f&#34;ERROR: Destination {os.path.join(image_directory,&#39;cloud.png&#39;)} already exists!&#34;)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        return orig_path, orig_image_name.split(&#34;.&#34;)[0]
+    except Exception as e:
+        logging.info(&#34;ERROR: An unexpected error occurred during image renaming!&#34;)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        exit(1)
+
+    return os.path.join(image_directory,&#39;cloud.png&#39;), orig_image_name.split(&#34;.&#34;)[0]
 
 def delete_image(file_path):
     &#34;&#34;&#34;
@@ -202,22 +271,24 @@ def check_images_remaining(image_directory=&#34;images/email_images&#34;):
     images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
     logging.info(f&#34;{len(images)} remain in {image_directory}&#34;)
     if len(images)&lt;=MIN_IMAGES:
-        logging.info(f&#34;Notifying admin {ADMIN_EMAIL}&#34;)
-        server = &#34;smtp.gmail.com&#34;,
-        port = 465
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
-            sender_email, password = get_sender_login()
-            server.login(sender_email, password)
-            msg = MIMEMultipart()
-            msg[&#39;Subject&#39;] = &#34;Warning: Cloud Emails Running Out!&#34;
-            msg[&#39;From&#39;] = sender_email
-            msg[&#39;To&#39;] = ADMIN_EMAIL
-            msg.attach(MIMEText(f&#34;Only {len(images)} remain in directory!&#34;))
-            logging.info(f&#34;Sending email to {ADMIN_EMAIL}&#34;)
-            server.sendmail(sender_email, ADMIN_EMAIL, msg.as_string())
-            logging.info(&#34;Email sent successfully&#34;)
-            logging.info(&#34;-&#34;*80)
+        admins = get_admin_emails()
+        for admin_email in admins:
+            logging.info(f&#34;Notifying admin {admin_email}&#34;)
+            server = &#34;smtp.gmail.com&#34;,
+            port = 465
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
+                sender_email, password = get_sender_login()
+                server.login(sender_email, password)
+                msg = MIMEMultipart()
+                msg[&#39;Subject&#39;] = &#34;Warning: Cloud Emails Running Out!&#34;
+                msg[&#39;From&#39;] = sender_email
+                msg[&#39;To&#39;] = admin_email
+                msg.attach(MIMEText(f&#34;Only {len(images)} remain in directory!&#34;))
+                logging.info(f&#34;Sending email to {admin_email}&#34;)
+                server.sendmail(sender_email, admin_email, msg.as_string())
+                logging.info(&#34;Email sent successfully&#34;)
+                logging.info(&#34;-&#34;*80)
     
 def send_email():
     &#34;&#34;&#34;
@@ -229,10 +300,9 @@ def send_email():
     server = &#34;smtp.gmail.com&#34;,
     port = 465
 
-    receiver_emails = get_receiver_emails()
-    message = get_message()
-    logging.info(f&#34;{message=}&#34;)
-    img_file = get_image()
+    default_message = &#34;Enjoy the clouds today!&#34;
+    receivers = get_receivers()
+    img_file, location_info = get_image()
     logging.info(f&#34;{img_file=}&#34;)
 
     context = ssl.create_default_context()
@@ -249,22 +319,32 @@ def send_email():
         
         logging.info(&#34;-&#34;*80)
 
-        for receiver_email in receiver_emails:
-            logging.info(f&#34;RECEIVER: {receiver_email}&#34;)
+        for receiver in receivers:
+            logging.info(f&#34;RECEIVER: {receiver}&#34;)
             logging.info(&#34;Starting MIME generation&#34;)
             msg = MIMEMultipart()
             msg[&#39;Subject&#39;] = &#34;Wow! New cloud just dropped!&#34;
             msg[&#39;From&#39;] = sender_email
-            msg[&#39;To&#39;] = receiver_email
+            msg[&#39;To&#39;] = receiver.address
+            message = &#34;&#34;
             logging.info(&#34;MIME msg metadata loaded&#34;)
-            text = MIMEText(message)
-            msg.attach(text)
+            # If the receiver wants a random message
+            if receiver.random_message:
+                message += get_message()
+                logging.info(f&#34;{message=}&#34;)
+            else:
+                message += default_message
+            # If the receiver wants the location information
+            if receiver.attach_original_name:
+                message+=f&#34;\nToday&#39;s location: {location_info}&#34;
+
+            msg.attach(MIMEText(message))
             image = MIMEImage(img_data, name=os.path.basename(img_file))
             msg.attach(image)
             logging.info(&#34;MIME msg body loaded&#34;)
 
-            logging.info(f&#34;Sending email to {receiver_email}&#34;)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
+            logging.info(f&#34;Sending email to {receiver.address}&#34;)
+            server.sendmail(sender_email, receiver.address, msg.as_string())
             logging.info(&#34;Email sent successfully&#34;)
             logging.info(&#34;-&#34;*80)
 
@@ -312,22 +392,24 @@ The path to the file containing the images to choose from</p></div>
     images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
     logging.info(f&#34;{len(images)} remain in {image_directory}&#34;)
     if len(images)&lt;=MIN_IMAGES:
-        logging.info(f&#34;Notifying admin {ADMIN_EMAIL}&#34;)
-        server = &#34;smtp.gmail.com&#34;,
-        port = 465
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
-            sender_email, password = get_sender_login()
-            server.login(sender_email, password)
-            msg = MIMEMultipart()
-            msg[&#39;Subject&#39;] = &#34;Warning: Cloud Emails Running Out!&#34;
-            msg[&#39;From&#39;] = sender_email
-            msg[&#39;To&#39;] = ADMIN_EMAIL
-            msg.attach(MIMEText(f&#34;Only {len(images)} remain in directory!&#34;))
-            logging.info(f&#34;Sending email to {ADMIN_EMAIL}&#34;)
-            server.sendmail(sender_email, ADMIN_EMAIL, msg.as_string())
-            logging.info(&#34;Email sent successfully&#34;)
-            logging.info(&#34;-&#34;*80)</code></pre>
+        admins = get_admin_emails()
+        for admin_email in admins:
+            logging.info(f&#34;Notifying admin {admin_email}&#34;)
+            server = &#34;smtp.gmail.com&#34;,
+            port = 465
+            context = ssl.create_default_context()
+            with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
+                sender_email, password = get_sender_login()
+                server.login(sender_email, password)
+                msg = MIMEMultipart()
+                msg[&#39;Subject&#39;] = &#34;Warning: Cloud Emails Running Out!&#34;
+                msg[&#39;From&#39;] = sender_email
+                msg[&#39;To&#39;] = admin_email
+                msg.attach(MIMEText(f&#34;Only {len(images)} remain in directory!&#34;))
+                logging.info(f&#34;Sending email to {admin_email}&#34;)
+                server.sendmail(sender_email, admin_email, msg.as_string())
+                logging.info(&#34;Email sent successfully&#34;)
+                logging.info(&#34;-&#34;*80)</code></pre>
 </details>
 </dd>
 <dt id="Emails.EmailSender.delete_image"><code class="name flex">
@@ -386,6 +468,48 @@ False otherwise</p></div>
         return True</code></pre>
 </details>
 </dd>
+<dt id="Emails.EmailSender.get_admin_emails"><code class="name flex">
+<span>def <span class="ident">get_admin_emails</span></span>(<span>email_data_file='Emails/email_list.json')</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get the admin addresses from the email data file</p>
+<hr>
+<p>Params</p>
+<p>email_data_file : Str, optional (defaults to "Emails/email_list.json")
+The location of the email data json file</p>
+<hr>
+<p>Returns : List[str]
+A list of email addresses of admins</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_admin_emails(email_data_file = &#34;Emails/email_list.json&#34;):
+    &#34;&#34;&#34;
+    Get the admin addresses from the email data file
+
+    ---
+
+    Params
+
+    email_data_file : Str, optional (defaults to &#34;Emails/email_list.json&#34;)
+        The location of the email data json file
+    ---
+
+    Returns : List[str]
+        A list of email addresses of admins
+    &#34;&#34;&#34;
+   
+    logging.info(&#34;LOAD ADMIN ADDRESSES&#34;)
+    data_file = open(email_data_file)
+    email_data = json.load(data_file)
+    data_file.close()
+    admins = email_data[&#34;admins&#34;]
+    logging.info(admins)
+    logging.info(&#34;ADMINS LOADED&#34;)
+    return admins</code></pre>
+</details>
+</dd>
 <dt id="Emails.EmailSender.get_image"><code class="name flex">
 <span>def <span class="ident">get_image</span></span>(<span>image_directory='images/email_images')</span>
 </code></dt>
@@ -396,8 +520,8 @@ False otherwise</p></div>
 <p>image_directory : Str
 The path to the file containing the images to choose from</p>
 <hr>
-<p>Returns : Str
-The path to the image chosen</p></div>
+<p>Returns : (Str, Str)
+The path to the image chosen, and the original image name (without extension)</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -415,20 +539,39 @@ The path to the image chosen</p></div>
 
     ---
 
-    Returns : Str
-        The path to the image chosen
+    Returns : (Str, Str)
+        The path to the image chosen, and the original image name (without extension)
     &#34;&#34;&#34;
     
     images = [f for f in os.listdir(image_directory) if os.path.isfile(os.path.join(image_directory, f))]
     # I want this to fail if no images present, something has gone wrong!
     try:
         image = random.choice(images)
+        orig_image_name = image
     except IndexError as e:
         logging.info(&#34;ERROR: No images to select from!&#34;)
         logging.debug(f&#34;{e=}&#34;)
         logging.debug(f&#34;{type(e)=}&#34;)
         exit(1)
-    return os.path.join(image_directory, image)</code></pre>
+
+    orig_path = os.path.join(image_directory, image)
+    logging.info(f&#34;Selected image {orig_path}&#34;)
+
+    try:
+        logging.info(f&#34;Renaming {os.path.join(image_directory, image)} to {os.path.join(image_directory,&#39;cloud.png&#39;)}&#34;)
+        os.replace(orig_path, os.path.join(image_directory,&#34;cloud.png&#34;))
+    except FileExistsError as e:
+        logging.info(f&#34;ERROR: Destination {os.path.join(image_directory,&#39;cloud.png&#39;)} already exists!&#34;)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        return orig_path, orig_image_name.split(&#34;.&#34;)[0]
+    except Exception as e:
+        logging.info(&#34;ERROR: An unexpected error occurred during image renaming!&#34;)
+        logging.debug(f&#34;{e=}&#34;)
+        logging.debug(f&#34;{type(e)=}&#34;)
+        exit(1)
+
+    return os.path.join(image_directory,&#39;cloud.png&#39;), orig_image_name.split(&#34;.&#34;)[0]</code></pre>
 </details>
 </dd>
 <dt id="Emails.EmailSender.get_message"><code class="name flex">
@@ -474,8 +617,8 @@ A single string, one message from the message list file</p></div>
     return message</code></pre>
 </details>
 </dd>
-<dt id="Emails.EmailSender.get_receiver_emails"><code class="name flex">
-<span>def <span class="ident">get_receiver_emails</span></span>(<span>receiver_emails_file='emails/email_list.txt')</span>
+<dt id="Emails.EmailSender.get_receivers"><code class="name flex">
+<span>def <span class="ident">get_receivers</span></span>(<span>receiver_emails_file='emails/email_list.json')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get all of the receiver email addresses to send emails to</p>
@@ -484,13 +627,13 @@ A single string, one message from the message list file</p></div>
 <p>receiver_emails_file : Str
 The path to the file containing the receiver email addresses</p>
 <hr>
-<p>Returns : List[Str]
-A list of strings of the receiver email addresses</p></div>
+<p>Returns : List[Receiver]
+A list of receiver data objects representing receivers</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_receiver_emails(receiver_emails_file = &#34;emails/email_list.txt&#34;):
+<pre><code class="python">def get_receivers(receiver_emails_file = &#34;emails/email_list.json&#34;):
     &#34;&#34;&#34;
     Get all of the receiver email addresses to send emails to
 
@@ -503,18 +646,33 @@ A list of strings of the receiver email addresses</p></div>
 
     ---
 
-    Returns : List[Str]
-        A list of strings of the receiver email addresses
+    Returns : List[Receiver]
+        A list of receiver data objects representing receivers
     &#34;&#34;&#34;
     
-    emails = []
-    with open(receiver_emails_file, &#34;r&#34;) as f:
-        emails = f.readlines()
-    return emails</code></pre>
+    logging.info(&#34;LOAD RECEIVER ADDRESSES&#34;)
+    data_file = open(receiver_emails_file)
+    email_data = json.load(data_file)
+    data_file.close()
+    receivers = []
+    for receiver_json in email_data[&#34;receivers&#34;]:
+        try:
+            receivers.append(Receiver(
+                receiver_json[&#34;address&#34;], 
+                bool(receiver_json[&#34;random_message&#34;]),
+                bool(receiver_json[&#34;attach_original_name&#34;])))
+        except Exception as e:
+            logging.info(f&#34;ERROR: {receiver_json} failed to parse into Receiver object&#34;)
+            logging.debug(f&#34;{e=}&#34;)
+            logging.debug(f&#34;{type(e)=}&#34;)
+
+    logging.info(receivers)
+    logging.info(&#34;RECEIVERS LOADED&#34;)
+    return receivers</code></pre>
 </details>
 </dd>
 <dt id="Emails.EmailSender.get_sender_login"><code class="name flex">
-<span>def <span class="ident">get_sender_login</span></span>(<span>data_json='emails/email_data.json')</span>
+<span>def <span class="ident">get_sender_login</span></span>(<span>data_json='emails/login_data.json')</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get the login details for the sender email account</p>
@@ -530,7 +688,7 @@ sender_email, password</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_sender_login(data_json = &#34;emails/email_data.json&#34;):
+<pre><code class="python">def get_sender_login(data_json = &#34;emails/login_data.json&#34;):
     &#34;&#34;&#34;
     Get the login details for the sender email account
 
@@ -576,10 +734,9 @@ sender_email, password</p></div>
     server = &#34;smtp.gmail.com&#34;,
     port = 465
 
-    receiver_emails = get_receiver_emails()
-    message = get_message()
-    logging.info(f&#34;{message=}&#34;)
-    img_file = get_image()
+    default_message = &#34;Enjoy the clouds today!&#34;
+    receivers = get_receivers()
+    img_file, location_info = get_image()
     logging.info(f&#34;{img_file=}&#34;)
 
     context = ssl.create_default_context()
@@ -596,22 +753,32 @@ sender_email, password</p></div>
         
         logging.info(&#34;-&#34;*80)
 
-        for receiver_email in receiver_emails:
-            logging.info(f&#34;RECEIVER: {receiver_email}&#34;)
+        for receiver in receivers:
+            logging.info(f&#34;RECEIVER: {receiver}&#34;)
             logging.info(&#34;Starting MIME generation&#34;)
             msg = MIMEMultipart()
             msg[&#39;Subject&#39;] = &#34;Wow! New cloud just dropped!&#34;
             msg[&#39;From&#39;] = sender_email
-            msg[&#39;To&#39;] = receiver_email
+            msg[&#39;To&#39;] = receiver.address
+            message = &#34;&#34;
             logging.info(&#34;MIME msg metadata loaded&#34;)
-            text = MIMEText(message)
-            msg.attach(text)
+            # If the receiver wants a random message
+            if receiver.random_message:
+                message += get_message()
+                logging.info(f&#34;{message=}&#34;)
+            else:
+                message += default_message
+            # If the receiver wants the location information
+            if receiver.attach_original_name:
+                message+=f&#34;\nToday&#39;s location: {location_info}&#34;
+
+            msg.attach(MIMEText(message))
             image = MIMEImage(img_data, name=os.path.basename(img_file))
             msg.attach(image)
             logging.info(&#34;MIME msg body loaded&#34;)
 
-            logging.info(f&#34;Sending email to {receiver_email}&#34;)
-            server.sendmail(sender_email, receiver_email, msg.as_string())
+            logging.info(f&#34;Sending email to {receiver.address}&#34;)
+            server.sendmail(sender_email, receiver.address, msg.as_string())
             logging.info(&#34;Email sent successfully&#34;)
             logging.info(&#34;-&#34;*80)
 
@@ -625,6 +792,44 @@ sender_email, password</p></div>
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="Emails.EmailSender.Receiver"><code class="flex name class">
+<span>class <span class="ident">Receiver</span></span>
+<span>(</span><span>address: str, random_message: bool, attach_original_name: bool)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>A dataclass to hold information about a particular receiver</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Receiver:
+    &#34;&#34;&#34;
+    A dataclass to hold information about a particular receiver
+    &#34;&#34;&#34;
+
+    address: str
+    random_message: bool
+    attach_original_name: bool</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="Emails.EmailSender.Receiver.address"><code class="name">var <span class="ident">address</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Emails.EmailSender.Receiver.attach_original_name"><code class="name">var <span class="ident">attach_original_name</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="Emails.EmailSender.Receiver.random_message"><code class="name">var <span class="ident">random_message</span> : bool</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -642,11 +847,24 @@ sender_email, password</p></div>
 <ul class="">
 <li><code><a title="Emails.EmailSender.check_images_remaining" href="#Emails.EmailSender.check_images_remaining">check_images_remaining</a></code></li>
 <li><code><a title="Emails.EmailSender.delete_image" href="#Emails.EmailSender.delete_image">delete_image</a></code></li>
+<li><code><a title="Emails.EmailSender.get_admin_emails" href="#Emails.EmailSender.get_admin_emails">get_admin_emails</a></code></li>
 <li><code><a title="Emails.EmailSender.get_image" href="#Emails.EmailSender.get_image">get_image</a></code></li>
 <li><code><a title="Emails.EmailSender.get_message" href="#Emails.EmailSender.get_message">get_message</a></code></li>
-<li><code><a title="Emails.EmailSender.get_receiver_emails" href="#Emails.EmailSender.get_receiver_emails">get_receiver_emails</a></code></li>
+<li><code><a title="Emails.EmailSender.get_receivers" href="#Emails.EmailSender.get_receivers">get_receivers</a></code></li>
 <li><code><a title="Emails.EmailSender.get_sender_login" href="#Emails.EmailSender.get_sender_login">get_sender_login</a></code></li>
 <li><code><a title="Emails.EmailSender.send_email" href="#Emails.EmailSender.send_email">send_email</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="Emails.EmailSender.Receiver" href="#Emails.EmailSender.Receiver">Receiver</a></code></h4>
+<ul class="">
+<li><code><a title="Emails.EmailSender.Receiver.address" href="#Emails.EmailSender.Receiver.address">address</a></code></li>
+<li><code><a title="Emails.EmailSender.Receiver.attach_original_name" href="#Emails.EmailSender.Receiver.attach_original_name">attach_original_name</a></code></li>
+<li><code><a title="Emails.EmailSender.Receiver.random_message" href="#Emails.EmailSender.Receiver.random_message">random_message</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -51,7 +51,7 @@ logging.basicConfig(filename=f&#34;logs/{str(datetime.datetime.utcnow().date())}
 class CloudSource:
     &#34;&#34;&#34;
     An object that holds information on a cloud source (a live webcam).
-    
+
     This includes the URL to the webcam (to wget from) and the coords to crop at
     &#34;&#34;&#34;
 
@@ -86,7 +86,7 @@ class CloudSource:
         logging.debug(self.debug_str())
 
     def __str__(self) -&gt; str:
-        return (self.time.replace(&#34;:&#34;, &#34;&#34;)) + &#34;-&#34; + self.name
+        return f&#39;{datetime.datetime.utcnow().date()} {(self.time.replace(&#34;:&#34;, &#34;&#34;))} {self.name}&#39;
 
     def __repr__(self) -&gt; str:
         return str(self)
@@ -160,6 +160,7 @@ class CloudSource:
             return False
 
         try:
+            im, cropped_im = None, None
             logging.info(&#34;CROPPING IMAGE&#34;)
             logging.debug(f&#34;Opening {image_name} with PIL&#34;)
             im = Image.open(image_name)
@@ -190,7 +191,10 @@ class CloudSource:
             logging.debug(f&#34;{type(e)=}&#34;)
             return False
         except Exception as e:
-            logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+            logging.info(f&#34;ERROR: An unexpected error occurred during cropping of {self.name}! Check URL and retry&#34;)
+            # Handle the case where a download is unexpectedly cut off
+            if im is not None: im.close()
+            if cropped_im is not None: cropped_im.close()
             delete_file(image_name)
             logging.info(f&#34;{e=}&#34;)
             logging.info(f&#34;{type(e)=}&#34;)
@@ -229,8 +233,6 @@ class CloudSource:
 def get_cloud_sources(clouds_data_file:str = &#34;Clouds/CloudSourcesData.json&#34;) -&gt; List[CloudSource]:
     &#34;&#34;&#34;
     Get all cloud sources specified in a data file.
-
-    See the readme for specification
 
     ---
 
@@ -382,8 +384,10 @@ def wget_sources():
         else:
             logging.info(f&#34;NO SLEEP NEEDED&#34;)
         logging.info(f&#34;GET {str(source)}&#34;)
-        source.get_image()
-        logging.info(&#34;GET SUCCESSFUL&#34;)
+        if source.get_image():
+            logging.info(&#34;GET SUCCESSFUL&#34;)
+        else:
+            logging.info(&#34;GET FAILED&#34;)
         logging.info(&#34;-&#34;*80)
     logging.info(&#34;GOT ALL SOURCES SUCCESSFULLY&#34;)
     logging.info(&#34;-&#34;*80)
@@ -511,7 +515,6 @@ False otherwise</p></div>
 </code></dt>
 <dd>
 <div class="desc"><p>Get all cloud sources specified in a data file.</p>
-<p>See the readme for specification</p>
 <hr>
 <p>Params</p>
 <p>clouds_data_file : str, optional (defaults to Clouds/CloudSourcesData.json)
@@ -526,8 +529,6 @@ A list of all of the cloud sources specified</p></div>
 <pre><code class="python">def get_cloud_sources(clouds_data_file:str = &#34;Clouds/CloudSourcesData.json&#34;) -&gt; List[CloudSource]:
     &#34;&#34;&#34;
     Get all cloud sources specified in a data file.
-
-    See the readme for specification
 
     ---
 
@@ -620,8 +621,10 @@ A list of all of the cloud sources specified</p></div>
         else:
             logging.info(f&#34;NO SLEEP NEEDED&#34;)
         logging.info(f&#34;GET {str(source)}&#34;)
-        source.get_image()
-        logging.info(&#34;GET SUCCESSFUL&#34;)
+        if source.get_image():
+            logging.info(&#34;GET SUCCESSFUL&#34;)
+        else:
+            logging.info(&#34;GET FAILED&#34;)
         logging.info(&#34;-&#34;*80)
     logging.info(&#34;GOT ALL SOURCES SUCCESSFULLY&#34;)
     logging.info(&#34;-&#34;*80)
@@ -663,7 +666,7 @@ e.g. '10:24' or '23:11'</p></div>
 <pre><code class="python">class CloudSource:
     &#34;&#34;&#34;
     An object that holds information on a cloud source (a live webcam).
-    
+
     This includes the URL to the webcam (to wget from) and the coords to crop at
     &#34;&#34;&#34;
 
@@ -698,7 +701,7 @@ e.g. '10:24' or '23:11'</p></div>
         logging.debug(self.debug_str())
 
     def __str__(self) -&gt; str:
-        return (self.time.replace(&#34;:&#34;, &#34;&#34;)) + &#34;-&#34; + self.name
+        return f&#39;{datetime.datetime.utcnow().date()} {(self.time.replace(&#34;:&#34;, &#34;&#34;))} {self.name}&#39;
 
     def __repr__(self) -&gt; str:
         return str(self)
@@ -772,6 +775,7 @@ e.g. '10:24' or '23:11'</p></div>
             return False
 
         try:
+            im, cropped_im = None, None
             logging.info(&#34;CROPPING IMAGE&#34;)
             logging.debug(f&#34;Opening {image_name} with PIL&#34;)
             im = Image.open(image_name)
@@ -802,7 +806,10 @@ e.g. '10:24' or '23:11'</p></div>
             logging.debug(f&#34;{type(e)=}&#34;)
             return False
         except Exception as e:
-            logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+            logging.info(f&#34;ERROR: An unexpected error occurred during cropping of {self.name}! Check URL and retry&#34;)
+            # Handle the case where a download is unexpectedly cut off
+            if im is not None: im.close()
+            if cropped_im is not None: cropped_im.close()
             delete_file(image_name)
             logging.info(f&#34;{e=}&#34;)
             logging.info(f&#34;{type(e)=}&#34;)
@@ -941,6 +948,7 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
         return False
 
     try:
+        im, cropped_im = None, None
         logging.info(&#34;CROPPING IMAGE&#34;)
         logging.debug(f&#34;Opening {image_name} with PIL&#34;)
         im = Image.open(image_name)
@@ -971,7 +979,10 @@ True if image is successfully downloaded and cropped, false otherwise</p></div>
         logging.debug(f&#34;{type(e)=}&#34;)
         return False
     except Exception as e:
-        logging.info(f&#34;ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry&#34;)
+        logging.info(f&#34;ERROR: An unexpected error occurred during cropping of {self.name}! Check URL and retry&#34;)
+        # Handle the case where a download is unexpectedly cut off
+        if im is not None: im.close()
+        if cropped_im is not None: cropped_im.close()
         delete_file(image_name)
         logging.info(f&#34;{e=}&#34;)
         logging.info(f&#34;{type(e)=}&#34;)
