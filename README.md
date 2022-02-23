@@ -11,6 +11,14 @@ This project uses the `smtplib` python library to send emails, meaning an email 
 
 ---
 
+## Running this project
+
+To get the cloud images from webcams, use the `get_sources.py` script. Logs are output to the `logs` directory, but you can expect the script to take roughly 24 hours to finish. Webcams are scrapped at the times specified under `Clouds/CloudSourceData.json`. Notice that the simple call to `CloudSource.wget_sources()` uses all of the default directories, so if you want to use your own directory structure please note the source code of `CloudSource.wget_sources()` and pass the correct arguments to function calls.
+
+To email clouds out, use the `main.py` script. Logs are again output to the `logs` directory. You should set up a cron job (or equivalent) to automate this, as well as prevent spam (by making the emails more consistent).
+
+---
+
 ## Collecting the clouds
 
 Under the `Clouds` directory you can find the scripts used to get images from webcams as well as the webcam information itself.
