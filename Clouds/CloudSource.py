@@ -58,7 +58,7 @@ class CloudSource:
         logging.debug(self.debug_str())
 
     def __str__(self) -> str:
-        return (self.time.replace(":", "")) + "-" + self.name
+        return f'{datetime.datetime.utcnow().date()} {(self.time.replace(":", ""))} {self.name}'
 
     def __repr__(self) -> str:
         return str(self)
@@ -132,6 +132,7 @@ class CloudSource:
             return False
 
         try:
+            im, cropped_im = None, None
             logging.info("CROPPING IMAGE")
             logging.debug(f"Opening {image_name} with PIL")
             im = Image.open(image_name)
@@ -162,7 +163,10 @@ class CloudSource:
             logging.debug(f"{type(e)=}")
             return False
         except Exception as e:
-            logging.info(f"ERROR: An unexpected error occurred during download of {self.name}! Check URL and retry")
+            logging.info(f"ERROR: An unexpected error occurred during cropping of {self.name}! Check URL and retry")
+            # Handle the case where a download is unexpectedly cut off
+            if im is not None: im.close()
+            if cropped_im is not None: cropped_im.close()
             delete_file(image_name)
             logging.info(f"{e=}")
             logging.info(f"{type(e)=}")
