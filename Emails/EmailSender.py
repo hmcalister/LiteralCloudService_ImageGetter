@@ -308,7 +308,7 @@ def send_email():
                 message += default_message
             # If the receiver wants the location information
             if receiver.attach_original_name:
-                message+=f"\nToday's location: {location_info}"
+                message+=f"\n{location_info}"
 
             msg.attach(MIMEText(message))
             image = MIMEImage(img_data, name=os.path.basename(img_file))
