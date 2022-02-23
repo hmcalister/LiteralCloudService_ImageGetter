@@ -47,19 +47,19 @@
             "name": "AliceSprings-Australia",
             "url": "http://www.alice.skycam.net.au/CAM1/image.jpg",
             "crop_coords": "(0,200,1800,900)",
-            "time_list": ["21:00", "01:00", "07:00", "10:00"]
+            "time_list": ["21:00", "01:00", "07:00", "9:45"]
         },
         {
             "name": "NynganSE-Australia",
             "url": "https://airportweathercams.com/YNYN/showimagecamera1.php",
             "crop_coords": "(0,150,2560,1400)",
-            "time_list": ["19:30", "00:00", "05:00", "09:00"]
+            "time_list": ["20:00", "00:00", "05:00", "09:00"]
         },
         {
             "name": "NynganNW-Australia",
             "url": "https://airportweathercams.com/YNYN/showimagecamera2.php",
             "crop_coords": "(0,150,2560,1400)",
-            "time_list": ["19:30", "00:00", "05:00", "09:00"]
+            "time_list": ["19:45", "00:00", "05:00", "09:00"]
         },
         {
             "name": "Geraldton-Australia",
@@ -71,7 +71,7 @@
             "name": "Alexandra-NZ",
             "url": "https://myairportcams.com/Alexandra/current3.jpg",
             "crop_coords": "(0,100,2560,1920)",
-            "time_list": ["18:00", "00:00", "04:00", "08:00"]
+            "time_list": ["18:30", "00:00", "04:00", "08:00"]
         },
         {
             "name": "Guaruja-Brazil",
