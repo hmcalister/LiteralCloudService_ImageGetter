@@ -55,10 +55,18 @@ class CloudSource:
         self.url = url
         self.crop_coords = crop_coords
         self.time = time
+
+        hour = int(self.time.split(":")[0])
+        minute = int(self.time.split(":")[1])
+        now = datetime.datetime.now()
+        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        # If our target time is in the past, we must make the target time in the future by adding a day
+        if self.target_time<now:
+            self.target_time += datetime.timedelta(days=(now-self.target_time).days+1)
         logging.debug(self.debug_str())
 
     def __str__(self) -> str:
-        return f'{datetime.datetime.utcnow().date()} {(self.time.replace(":", ""))} {self.name}'
+        return f'{self.target_time} {self.name}'
 
     def __repr__(self) -> str:
         return str(self)
@@ -320,19 +328,21 @@ def wget_sources():
     This is currently very static, intended to get the job done quickly. In future this may be parameterized.
     """
 
+    logging.info("LOAD SOURCES")
     cloud_sources:List[CloudSource] = get_cloud_sources()
+    logging.info("LOAD SUCCESSFUL")
     logging.debug(cloud_sources)
     logging.info("-"*80)
 
-    logging.info("GET TARGET TIMES")
-    for source in cloud_sources:
-        now = datetime.datetime.utcnow()
-        logging.debug(f"{now=}")
-        logging.debug(f"{source=}")
-        source.set_target_time(now)
+    # logging.info("GET TARGET TIMES")
+    # for source in cloud_sources:
+    #     now = datetime.datetime.utcnow()
+    #     logging.debug(f"{now=}")
+    #     logging.debug(f"{source=}")
+    #     source.set_target_time(now)
 
-    logging.info("TARGET TIMES CREATED")
-    logging.info("-"*80)
+    # logging.info("TARGET TIMES CREATED")
+    # logging.info("-"*80)
     logging.info("SORTING SOURCES")
     cloud_sources.sort(key = lambda x:x.target_time)
     logging.info("SOURCES SORTED")
