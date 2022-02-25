@@ -1,0 +1,2 @@
+# Ignore all documentation files for language statistics
+pydocs/* linguist-documentation
