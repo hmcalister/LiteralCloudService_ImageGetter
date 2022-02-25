@@ -61,9 +61,12 @@ The `CloudSource.py` file exposes the `CloudSource` class, which represents a si
 This file also has several useful methods, including:
 - `get_cloud_sources`: Get all of the cloud sources specified in `CloudSourcesData.json`
 - `archive_images`: Move all of the images from `images/current_downloads` to `images/{date}`, although this should not need to be called externally
-- `wget_sources`: Get all of the sources images over the course of a day. This method is really the only call that needs to be made from a script (see `get_sources.py`). Logging from this is sent to `logs/{date}-cloud-sources.log` and are fairly comprehensive. Most errors possible are handled and logged (as a single error could prevent future sources from resolving).
 
 See `pydocs/Clouds` for more detailed documentation.
+
+## How to Use CloudSource
+
+A script in the root directory called `wget_sources` is set up to handle getting all of the source images over the course of a day. Logging from this is sent to `logs/{date}-cloud-sources.log` and are fairly comprehensive. Most errors possible are handled and logged (as a single error could prevent future sources from resolving).
 
 ---
 
@@ -107,9 +110,11 @@ Where :
 
 This is where the magic happens! Using `smtplib` and `email.mime` cloud images are sent to receivers. Receivers are stored in `Receiver` dataclass objects, which also stores if that instance of the receiver wants a random message or the default, and if the instance wants the original name (all of which is derived from json file above).
 
-This script gets the receiver addresses from the JSON file, chooses a random image from `images/email_images`, and creates emails for each receiver (if the receiver has `random_message` as true, then a random message from `Emails/message_list.txt` is chosen for the body). Finally, the email is sent using the login details from the file above.
+A basic email sending method is offered (`send_email`) that abstracts the sending of an email to giving the receiver address, subject, body, and an optional image path. This uses the default SMTP server which is logged in to when this module is imported, so no need to connect to the SMTP server each time.
 
-See `pydocs/Emails` for more detailed documentation.
+Please be aware that this means you will need to manually close the SMTP server at the end of your script, or rely on timeout.
+
+See `pydocs/Emails` for more detailed documentation, and see `main.py` for an example of how this module can be used.
 
 ---
 
