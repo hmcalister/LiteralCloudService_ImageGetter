@@ -1,3 +1,6 @@
+# `images` subdirectories
+I cannot be sure if python will automatically create these directories for you. Before running this script (or, after getting an error more likely) please create the following directories:
+
 ## `current_downloads`
 The directory for a process to save images from a current run of downloads to. New images are added to this directory before being archived
 
