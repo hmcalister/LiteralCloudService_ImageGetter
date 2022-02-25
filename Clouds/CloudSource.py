@@ -66,7 +66,7 @@ class CloudSource:
         logging.debug(self.debug_str())
 
     def __str__(self) -> str:
-        return f'{self.target_time} {self.name}'
+        return f'{self.target_time.strftime("%Y-%m-%d %H%M")} {self.name}'
 
     def __repr__(self) -> str:
         return str(self)
