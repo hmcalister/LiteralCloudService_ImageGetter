@@ -58,7 +58,7 @@ class CloudSource:
 
         hour = int(self.time.split(":")[0])
         minute = int(self.time.split(":")[1])
-        now = datetime.datetime.now()
+        now = datetime.datetime.utcnow()
         self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
         # If our target time is in the past, we must make the target time in the future by adding a day
         if self.target_time<now:
