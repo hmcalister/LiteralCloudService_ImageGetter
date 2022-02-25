@@ -42,11 +42,6 @@ from PIL import Image, UnidentifiedImageError
 
 # To get around dodgy webcams with expired SSL certificates
 ssl._create_default_https_context = ssl._create_unverified_context
-logging.Formatter.converter = time.gmtime
-logging.basicConfig(filename=f&#34;logs/{str(datetime.datetime.utcnow().date())}-cloud-sources.log&#34;, 
-    format=&#39;%(asctime)s %(levelname)-8s %(message)s&#39;,
-    level=logging.INFO,
-    datefmt=&#39;%Y-%m-%d %H:%M:%S&#39;)
 
 class CloudSource:
     &#34;&#34;&#34;
@@ -83,10 +78,18 @@ class CloudSource:
         self.url = url
         self.crop_coords = crop_coords
         self.time = time
+
+        hour = int(self.time.split(&#34;:&#34;)[0])
+        minute = int(self.time.split(&#34;:&#34;)[1])
+        now = datetime.datetime.utcnow()
+        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        # If our target time is in the past, we must make the target time in the future by adding a day
+        if self.target_time&lt;now:
+            self.target_time += datetime.timedelta(days=(now-self.target_time).days+1)
         logging.debug(self.debug_str())
 
     def __str__(self) -&gt; str:
-        return f&#39;{datetime.datetime.utcnow().date()} {(self.time.replace(&#34;:&#34;, &#34;&#34;))} {self.name}&#39;
+        return f&#39;{self.target_time.strftime(&#34;%Y-%m-%d %H%M&#34;)} {self.name}&#39;
 
     def __repr__(self) -&gt; str:
         return str(self)
@@ -339,61 +342,7 @@ def archive_images(backup_dir=None, current_dir=&#34;images/current_downloads&#3
     except Exception as e:
         logging.info(&#34;ERROR: Failed to move images to backup folder!&#34;)
         logging.debug(f&#34;{e=}&#34;)
-        logging.debug(f&#34;{type(e)=}&#34;)
-
-def wget_sources():
-    &#34;&#34;&#34;
-    For all of the cloud sources in the cloud source json file, get the image from that source for this day.
-
-    This is currently very static, intended to get the job done quickly. In future this may be parameterized.
-    &#34;&#34;&#34;
-
-    cloud_sources:List[CloudSource] = get_cloud_sources()
-    logging.debug(cloud_sources)
-    logging.info(&#34;-&#34;*80)
-
-    logging.info(&#34;GET TARGET TIMES&#34;)
-    for source in cloud_sources:
-        now = datetime.datetime.utcnow()
-        logging.debug(f&#34;{now=}&#34;)
-        logging.debug(f&#34;{source=}&#34;)
-        source.set_target_time(now)
-
-    logging.info(&#34;TARGET TIMES CREATED&#34;)
-    logging.info(&#34;-&#34;*80)
-    logging.info(&#34;SORTING SOURCES&#34;)
-    cloud_sources.sort(key = lambda x:x.target_time)
-    logging.info(&#34;SOURCES SORTED&#34;)
-    for source in cloud_sources:
-        logging.info(f&#34;{str(source):&lt;50}{source.target_time}&#34;)
-
-    logging.info(&#34;-&#34;*80)
-
-    logging.info(&#34;START GET FROM SOURCES&#34;)
-    for source in cloud_sources:
-        logging.info(f&#34;{source=}&#34;)
-        logging.info(f&#34;CURRENT TIME (LOCAL): {datetime.datetime.now()}&#34;)
-        logging.info(f&#34;CURRENT TIME (UTC): {datetime.datetime.utcnow()}&#34;)
-        now = datetime.datetime.utcnow()
-        delta = source.target_time - now
-        if delta.total_seconds() &gt; 0:
-            logging.info(f&#34;SLEEPING FOR {delta.total_seconds()}s&#34;)
-            logging.info(f&#34;SLEEP FINISH SCHEDULED FOR (LOCAL): {datetime.datetime.now()+delta}&#34;)
-            logging.info(f&#34;SLEEP FINISH SCHEDULED FOR (UTC): {datetime.datetime.utcnow()+delta}&#34;)
-            time.sleep(delta.total_seconds())
-        else:
-            logging.info(f&#34;NO SLEEP NEEDED&#34;)
-        logging.info(f&#34;GET {str(source)}&#34;)
-        if source.get_image():
-            logging.info(&#34;GET SUCCESSFUL&#34;)
-        else:
-            logging.info(&#34;GET FAILED&#34;)
-        logging.info(&#34;-&#34;*80)
-    logging.info(&#34;GOT ALL SOURCES SUCCESSFULLY&#34;)
-    logging.info(&#34;-&#34;*80)
-    logging.info(&#34;MOVE IMAGES TO BACKUP FOLDER&#34;)
-    archive_images()
-    logging.info(&#34;-&#34;*80)</code></pre>
+        logging.debug(f&#34;{type(e)=}&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -568,71 +517,6 @@ A list of all of the cloud sources specified</p></div>
     return cloud_sources</code></pre>
 </details>
 </dd>
-<dt id="Clouds.CloudSource.wget_sources"><code class="name flex">
-<span>def <span class="ident">wget_sources</span></span>(<span>)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>For all of the cloud sources in the cloud source json file, get the image from that source for this day.</p>
-<p>This is currently very static, intended to get the job done quickly. In future this may be parameterized.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def wget_sources():
-    &#34;&#34;&#34;
-    For all of the cloud sources in the cloud source json file, get the image from that source for this day.
-
-    This is currently very static, intended to get the job done quickly. In future this may be parameterized.
-    &#34;&#34;&#34;
-
-    cloud_sources:List[CloudSource] = get_cloud_sources()
-    logging.debug(cloud_sources)
-    logging.info(&#34;-&#34;*80)
-
-    logging.info(&#34;GET TARGET TIMES&#34;)
-    for source in cloud_sources:
-        now = datetime.datetime.utcnow()
-        logging.debug(f&#34;{now=}&#34;)
-        logging.debug(f&#34;{source=}&#34;)
-        source.set_target_time(now)
-
-    logging.info(&#34;TARGET TIMES CREATED&#34;)
-    logging.info(&#34;-&#34;*80)
-    logging.info(&#34;SORTING SOURCES&#34;)
-    cloud_sources.sort(key = lambda x:x.target_time)
-    logging.info(&#34;SOURCES SORTED&#34;)
-    for source in cloud_sources:
-        logging.info(f&#34;{str(source):&lt;50}{source.target_time}&#34;)
-
-    logging.info(&#34;-&#34;*80)
-
-    logging.info(&#34;START GET FROM SOURCES&#34;)
-    for source in cloud_sources:
-        logging.info(f&#34;{source=}&#34;)
-        logging.info(f&#34;CURRENT TIME (LOCAL): {datetime.datetime.now()}&#34;)
-        logging.info(f&#34;CURRENT TIME (UTC): {datetime.datetime.utcnow()}&#34;)
-        now = datetime.datetime.utcnow()
-        delta = source.target_time - now
-        if delta.total_seconds() &gt; 0:
-            logging.info(f&#34;SLEEPING FOR {delta.total_seconds()}s&#34;)
-            logging.info(f&#34;SLEEP FINISH SCHEDULED FOR (LOCAL): {datetime.datetime.now()+delta}&#34;)
-            logging.info(f&#34;SLEEP FINISH SCHEDULED FOR (UTC): {datetime.datetime.utcnow()+delta}&#34;)
-            time.sleep(delta.total_seconds())
-        else:
-            logging.info(f&#34;NO SLEEP NEEDED&#34;)
-        logging.info(f&#34;GET {str(source)}&#34;)
-        if source.get_image():
-            logging.info(&#34;GET SUCCESSFUL&#34;)
-        else:
-            logging.info(&#34;GET FAILED&#34;)
-        logging.info(&#34;-&#34;*80)
-    logging.info(&#34;GOT ALL SOURCES SUCCESSFULLY&#34;)
-    logging.info(&#34;-&#34;*80)
-    logging.info(&#34;MOVE IMAGES TO BACKUP FOLDER&#34;)
-    archive_images()
-    logging.info(&#34;-&#34;*80)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -698,10 +582,18 @@ e.g. '10:24' or '23:11'</p></div>
         self.url = url
         self.crop_coords = crop_coords
         self.time = time
+
+        hour = int(self.time.split(&#34;:&#34;)[0])
+        minute = int(self.time.split(&#34;:&#34;)[1])
+        now = datetime.datetime.utcnow()
+        self.target_time:datetime.datetime = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        # If our target time is in the past, we must make the target time in the future by adding a day
+        if self.target_time&lt;now:
+            self.target_time += datetime.timedelta(days=(now-self.target_time).days+1)
         logging.debug(self.debug_str())
 
     def __str__(self) -&gt; str:
-        return f&#39;{datetime.datetime.utcnow().date()} {(self.time.replace(&#34;:&#34;, &#34;&#34;))} {self.name}&#39;
+        return f&#39;{self.target_time.strftime(&#34;%Y-%m-%d %H%M&#34;)} {self.name}&#39;
 
     def __repr__(self) -&gt; str:
         return str(self)
@@ -1059,7 +951,6 @@ A datetime object representing the time at which this source should be triggered
 <li><code><a title="Clouds.CloudSource.archive_images" href="#Clouds.CloudSource.archive_images">archive_images</a></code></li>
 <li><code><a title="Clouds.CloudSource.delete_file" href="#Clouds.CloudSource.delete_file">delete_file</a></code></li>
 <li><code><a title="Clouds.CloudSource.get_cloud_sources" href="#Clouds.CloudSource.get_cloud_sources">get_cloud_sources</a></code></li>
-<li><code><a title="Clouds.CloudSource.wget_sources" href="#Clouds.CloudSource.wget_sources">wget_sources</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>

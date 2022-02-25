@@ -26,60 +26,11 @@
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import smtplib, ssl, os, logging, random, datetime, json, time
+<pre><code class="python">import smtplib, ssl, os, logging, random, json
 from dataclasses import dataclass
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
-
-logging.Formatter.converter = time.gmtime
-logging.basicConfig(filename=f&#34;logs/{str(datetime.datetime.utcnow().date())}-email.log&#34;,
-    format=&#39;%(asctime)s %(levelname)-8s %(message)s&#39;,
-    level=logging.INFO,
-    datefmt=&#39;%Y-%m-%d %H:%M:%S&#39;)
-
-logging.info(&#34;-&#34;*80)
-logging.info(&#34;*&#34;*80)
-logging.info(f&#34;SCRIPT START AT LOCAL {datetime.datetime.now()}&#34;)
-logging.info(f&#34;SCRIPT START AT UTC {datetime.datetime.utcnow()}&#34;)
-logging.info(&#34;*&#34;*80)
-logging.info(&#34;-&#34;*80)
-
-@dataclass
-class Receiver:
-    &#34;&#34;&#34;
-    A dataclass to hold information about a particular receiver
-    &#34;&#34;&#34;
-
-    address: str
-    random_message: bool
-    attach_original_name: bool
-
-
-def get_admin_emails(email_data_file = &#34;Emails/email_list.json&#34;):
-    &#34;&#34;&#34;
-    Get the admin addresses from the email data file
-
-    ---
-
-    Params
-
-    email_data_file : Str, optional (defaults to &#34;Emails/email_list.json&#34;)
-        The location of the email data json file
-    ---
-
-    Returns : List[str]
-        A list of email addresses of admins
-    &#34;&#34;&#34;
-   
-    logging.info(&#34;LOAD ADMIN ADDRESSES&#34;)
-    data_file = open(email_data_file)
-    email_data = json.load(data_file)
-    data_file.close()
-    admins = email_data[&#34;admins&#34;]
-    logging.info(admins)
-    logging.info(&#34;ADMINS LOADED&#34;)
-    return admins
 
 def get_sender_login(data_json = &#34;emails/login_data.json&#34;):
     &#34;&#34;&#34;
@@ -106,6 +57,112 @@ def get_sender_login(data_json = &#34;emails/login_data.json&#34;):
     sender_email = email_data[&#34;sender_address&#34;]
     password = email_data[&#34;email_password&#34;]
     return sender_email, password
+
+server_address = &#34;smtp.gmail.com&#34;
+port = 465
+context = ssl.create_default_context()
+sender_email, password = get_sender_login()
+SMTP_SERVER = smtplib.SMTP_SSL(server_address, port, context=context)
+SMTP_SERVER.login(sender_email, password)
+
+@dataclass
+class Receiver:
+    &#34;&#34;&#34;
+    A dataclass to hold information about a particular receiver
+    &#34;&#34;&#34;
+
+    address: str
+    random_message: bool
+    attach_original_name: bool
+
+
+def send_email(receiver_address:str, subject:str, body:str, image = None, server:smtplib.SMTP_SSL=SMTP_SERVER):
+    &#34;&#34;&#34;
+    Send an email to the receiver address, handelling all the backend MIME interactions
+
+    ---
+
+    Params
+
+    receiver_address : str
+        The email address to send this email to
+
+    subject : str
+        The subject of the email to be sent
+
+    body : str
+        The body of the email to be sent
+
+    image : str, optional (defaults to None)
+        Path to an image to attach to this email
+        If None, no image is attached
+
+    server : smtplib.SMTP_SSL
+        The email server to send the email via
+        Should already be logged in
+
+    ---
+
+    Returns : Boolean
+        True if email is sent successfully, False otherwise
+
+    &#34;&#34;&#34;
+            
+    logging.info(&#34;Connect to email server&#34;)
+    logging.info(&#34;Starting MIME generation&#34;)
+    msg = MIMEMultipart()
+    msg[&#39;Subject&#39;] = subject
+    msg[&#39;From&#39;] = sender_email
+    msg[&#39;To&#39;] = receiver_address
+
+    msg.attach(MIMEText(body))
+
+    if image is not None:
+        logging.info(f&#34;Accessing file {image=}&#34;)
+        with open(image, &#39;rb&#39;) as f:
+            img_data = f.read()
+        logging.info(f&#34;File {image=} successfully loaded&#34;)
+        image_attachment = MIMEImage(img_data, name=os.path.basename(image))
+        msg.attach(image_attachment)
+
+    logging.info(&#34;MIME msg metadata loaded&#34;)        
+    logging.info(f&#34;Sending email to {receiver_address}&#34;)
+    try:
+        server.sendmail(sender_email, receiver_address, msg.as_string())
+        logging.info(&#34;Email sent successfully&#34;)
+        logging.info(&#34;-&#34;*80)
+        return True
+    except Exception as e:
+        logging.info(f&#34;ERROR: An error occurred during emailing!&#34;)
+        logging.info(f&#34;{e=}&#34;)
+        logging.info(f&#34;{type(e)=}&#34;)
+        logging.info(&#34;-&#34;*80)
+        return False
+    
+def get_admin_emails(email_data_file = &#34;Emails/email_list.json&#34;):
+    &#34;&#34;&#34;
+    Get the admin addresses from the email data file
+
+    ---
+
+    Params
+
+    email_data_file : Str, optional (defaults to &#34;Emails/email_list.json&#34;)
+        The location of the email data json file
+    ---
+
+    Returns : List[str]
+        A list of email addresses of admins
+    &#34;&#34;&#34;
+   
+    logging.info(&#34;LOAD ADMIN ADDRESSES&#34;)
+    data_file = open(email_data_file)
+    email_data = json.load(data_file)
+    data_file.close()
+    admins = email_data[&#34;admins&#34;]
+    logging.info(admins)
+    logging.info(&#34;ADMINS LOADED&#34;)
+    return admins
 
 def get_receivers(receiver_emails_file = &#34;emails/email_list.json&#34;):
     &#34;&#34;&#34;
@@ -274,85 +331,7 @@ def check_images_remaining(image_directory=&#34;images/email_images&#34;):
         admins = get_admin_emails()
         for admin_email in admins:
             logging.info(f&#34;Notifying admin {admin_email}&#34;)
-            server = &#34;smtp.gmail.com&#34;,
-            port = 465
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
-                sender_email, password = get_sender_login()
-                server.login(sender_email, password)
-                msg = MIMEMultipart()
-                msg[&#39;Subject&#39;] = &#34;Warning: Cloud Emails Running Out!&#34;
-                msg[&#39;From&#39;] = sender_email
-                msg[&#39;To&#39;] = admin_email
-                msg.attach(MIMEText(f&#34;Only {len(images)} remain in directory!&#34;))
-                logging.info(f&#34;Sending email to {admin_email}&#34;)
-                server.sendmail(sender_email, admin_email, msg.as_string())
-                logging.info(&#34;Email sent successfully&#34;)
-                logging.info(&#34;-&#34;*80)
-    
-def send_email():
-    &#34;&#34;&#34;
-    Send an email to the list of email recipients, choosing a random message and image, then deleting that image to avoid duplicates
-    &#34;&#34;&#34;
-
-    logging.info(&#34;Started email method...&#34;)
-
-    server = &#34;smtp.gmail.com&#34;,
-    port = 465
-
-    default_message = &#34;Enjoy the clouds today!&#34;
-    receivers = get_receivers()
-    img_file, location_info = get_image()
-    logging.info(f&#34;{img_file=}&#34;)
-
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
-        logging.info(&#34;Accessed email server...&#34;)
-        logging.info(&#34;Logging into server with credentials...&#34;)
-        sender_email, password = get_sender_login()
-        server.login(sender_email, password)
-        
-        logging.info(f&#34;Accessing file {img_file=}&#34;)
-        with open(img_file, &#39;rb&#39;) as f:
-            img_data = f.read()
-        logging.info(f&#34;File {img_file=} successfully loaded&#34;)
-        
-        logging.info(&#34;-&#34;*80)
-
-        for receiver in receivers:
-            logging.info(f&#34;RECEIVER: {receiver}&#34;)
-            logging.info(&#34;Starting MIME generation&#34;)
-            msg = MIMEMultipart()
-            msg[&#39;Subject&#39;] = &#34;Wow! New cloud just dropped!&#34;
-            msg[&#39;From&#39;] = sender_email
-            msg[&#39;To&#39;] = receiver.address
-            message = &#34;&#34;
-            logging.info(&#34;MIME msg metadata loaded&#34;)
-            # If the receiver wants a random message
-            if receiver.random_message:
-                message += get_message()
-                logging.info(f&#34;{message=}&#34;)
-            else:
-                message += default_message
-            # If the receiver wants the location information
-            if receiver.attach_original_name:
-                message+=f&#34;\nToday&#39;s location: {location_info}&#34;
-
-            msg.attach(MIMEText(message))
-            image = MIMEImage(img_data, name=os.path.basename(img_file))
-            msg.attach(image)
-            logging.info(&#34;MIME msg body loaded&#34;)
-
-            logging.info(f&#34;Sending email to {receiver.address}&#34;)
-            server.sendmail(sender_email, receiver.address, msg.as_string())
-            logging.info(&#34;Email sent successfully&#34;)
-            logging.info(&#34;-&#34;*80)
-
-    logging.info(&#34;Deleting image&#34;)
-    delete_image(img_file)
-    logging.info(&#34;Image deleted&#34;)
-    logging.info(&#34;EMAILING FINISHED&#34;)
-    logging.info(&#34;*&#34;*80)</code></pre>
+            send_email(admin_email, &#34;Warning: Cloud Emails Running Out!&#34;, f&#34;Only {len(images)} remain in directory!&#34;)    </code></pre>
 </details>
 </section>
 <section>
@@ -395,21 +374,7 @@ The path to the file containing the images to choose from</p></div>
         admins = get_admin_emails()
         for admin_email in admins:
             logging.info(f&#34;Notifying admin {admin_email}&#34;)
-            server = &#34;smtp.gmail.com&#34;,
-            port = 465
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
-                sender_email, password = get_sender_login()
-                server.login(sender_email, password)
-                msg = MIMEMultipart()
-                msg[&#39;Subject&#39;] = &#34;Warning: Cloud Emails Running Out!&#34;
-                msg[&#39;From&#39;] = sender_email
-                msg[&#39;To&#39;] = admin_email
-                msg.attach(MIMEText(f&#34;Only {len(images)} remain in directory!&#34;))
-                logging.info(f&#34;Sending email to {admin_email}&#34;)
-                server.sendmail(sender_email, admin_email, msg.as_string())
-                logging.info(&#34;Email sent successfully&#34;)
-                logging.info(&#34;-&#34;*80)</code></pre>
+            send_email(admin_email, &#34;Warning: Cloud Emails Running Out!&#34;, f&#34;Only {len(images)} remain in directory!&#34;)    </code></pre>
 </details>
 </dd>
 <dt id="Emails.EmailSender.delete_image"><code class="name flex">
@@ -716,77 +681,93 @@ sender_email, password</p></div>
 </details>
 </dd>
 <dt id="Emails.EmailSender.send_email"><code class="name flex">
-<span>def <span class="ident">send_email</span></span>(<span>)</span>
+<span>def <span class="ident">send_email</span></span>(<span>receiver_address: str, subject: str, body: str, image=None, server: smtplib.SMTP_SSL = &lt;smtplib.SMTP_SSL object&gt;)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Send an email to the list of email recipients, choosing a random message and image, then deleting that image to avoid duplicates</p></div>
+<div class="desc"><p>Send an email to the receiver address, handelling all the backend MIME interactions</p>
+<hr>
+<p>Params</p>
+<p>receiver_address : str
+The email address to send this email to</p>
+<p>subject : str
+The subject of the email to be sent</p>
+<p>body : str
+The body of the email to be sent</p>
+<p>image : str, optional (defaults to None)
+Path to an image to attach to this email
+If None, no image is attached</p>
+<p>server : smtplib.SMTP_SSL
+The email server to send the email via
+Should already be logged in</p>
+<hr>
+<p>Returns : Boolean
+True if email is sent successfully, False otherwise</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def send_email():
+<pre><code class="python">def send_email(receiver_address:str, subject:str, body:str, image = None, server:smtplib.SMTP_SSL=SMTP_SERVER):
     &#34;&#34;&#34;
-    Send an email to the list of email recipients, choosing a random message and image, then deleting that image to avoid duplicates
+    Send an email to the receiver address, handelling all the backend MIME interactions
+
+    ---
+
+    Params
+
+    receiver_address : str
+        The email address to send this email to
+
+    subject : str
+        The subject of the email to be sent
+
+    body : str
+        The body of the email to be sent
+
+    image : str, optional (defaults to None)
+        Path to an image to attach to this email
+        If None, no image is attached
+
+    server : smtplib.SMTP_SSL
+        The email server to send the email via
+        Should already be logged in
+
+    ---
+
+    Returns : Boolean
+        True if email is sent successfully, False otherwise
+
     &#34;&#34;&#34;
+            
+    logging.info(&#34;Connect to email server&#34;)
+    logging.info(&#34;Starting MIME generation&#34;)
+    msg = MIMEMultipart()
+    msg[&#39;Subject&#39;] = subject
+    msg[&#39;From&#39;] = sender_email
+    msg[&#39;To&#39;] = receiver_address
 
-    logging.info(&#34;Started email method...&#34;)
+    msg.attach(MIMEText(body))
 
-    server = &#34;smtp.gmail.com&#34;,
-    port = 465
-
-    default_message = &#34;Enjoy the clouds today!&#34;
-    receivers = get_receivers()
-    img_file, location_info = get_image()
-    logging.info(f&#34;{img_file=}&#34;)
-
-    context = ssl.create_default_context()
-    with smtplib.SMTP_SSL(&#34;smtp.gmail.com&#34;, port, context=context) as server:
-        logging.info(&#34;Accessed email server...&#34;)
-        logging.info(&#34;Logging into server with credentials...&#34;)
-        sender_email, password = get_sender_login()
-        server.login(sender_email, password)
-        
-        logging.info(f&#34;Accessing file {img_file=}&#34;)
-        with open(img_file, &#39;rb&#39;) as f:
+    if image is not None:
+        logging.info(f&#34;Accessing file {image=}&#34;)
+        with open(image, &#39;rb&#39;) as f:
             img_data = f.read()
-        logging.info(f&#34;File {img_file=} successfully loaded&#34;)
-        
+        logging.info(f&#34;File {image=} successfully loaded&#34;)
+        image_attachment = MIMEImage(img_data, name=os.path.basename(image))
+        msg.attach(image_attachment)
+
+    logging.info(&#34;MIME msg metadata loaded&#34;)        
+    logging.info(f&#34;Sending email to {receiver_address}&#34;)
+    try:
+        server.sendmail(sender_email, receiver_address, msg.as_string())
+        logging.info(&#34;Email sent successfully&#34;)
         logging.info(&#34;-&#34;*80)
-
-        for receiver in receivers:
-            logging.info(f&#34;RECEIVER: {receiver}&#34;)
-            logging.info(&#34;Starting MIME generation&#34;)
-            msg = MIMEMultipart()
-            msg[&#39;Subject&#39;] = &#34;Wow! New cloud just dropped!&#34;
-            msg[&#39;From&#39;] = sender_email
-            msg[&#39;To&#39;] = receiver.address
-            message = &#34;&#34;
-            logging.info(&#34;MIME msg metadata loaded&#34;)
-            # If the receiver wants a random message
-            if receiver.random_message:
-                message += get_message()
-                logging.info(f&#34;{message=}&#34;)
-            else:
-                message += default_message
-            # If the receiver wants the location information
-            if receiver.attach_original_name:
-                message+=f&#34;\nToday&#39;s location: {location_info}&#34;
-
-            msg.attach(MIMEText(message))
-            image = MIMEImage(img_data, name=os.path.basename(img_file))
-            msg.attach(image)
-            logging.info(&#34;MIME msg body loaded&#34;)
-
-            logging.info(f&#34;Sending email to {receiver.address}&#34;)
-            server.sendmail(sender_email, receiver.address, msg.as_string())
-            logging.info(&#34;Email sent successfully&#34;)
-            logging.info(&#34;-&#34;*80)
-
-    logging.info(&#34;Deleting image&#34;)
-    delete_image(img_file)
-    logging.info(&#34;Image deleted&#34;)
-    logging.info(&#34;EMAILING FINISHED&#34;)
-    logging.info(&#34;*&#34;*80)</code></pre>
+        return True
+    except Exception as e:
+        logging.info(f&#34;ERROR: An error occurred during emailing!&#34;)
+        logging.info(f&#34;{e=}&#34;)
+        logging.info(f&#34;{type(e)=}&#34;)
+        logging.info(&#34;-&#34;*80)
+        return False</code></pre>
 </details>
 </dd>
 </dl>
