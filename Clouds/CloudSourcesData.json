@@ -17,13 +17,13 @@
             "name": "Stavrakia-Crete",
             "url": "http://penteli.meteo.gr/stations/stavrakia/webcam.jpg",
             "crop_coords": "(0,100,1280,720)",
-            "time_list": ["05:00", "11:00", "13:00", "16:30"]
+            "time_list": ["05:00", "11:00", "13:00", "16:15"]
         },
         {
             "name": "Kalahari-Namibia",
             "url": "https://weather.namsearch.com/anibcam/images/GondwanaKalahariAnib.jpg",
             "crop_coords": "(0,100,1920,950)",
-            "time_list": ["05:00", "10:00", "15:00", "18:00"]
+            "time_list": ["05:00", "10:00", "15:00", "17:30"]
         },
         {
             "name": "Regina-Canada",
@@ -47,7 +47,7 @@
             "name": "AliceSprings-Australia",
             "url": "http://www.alice.skycam.net.au/CAM1/image.jpg",
             "crop_coords": "(0,200,1800,900)",
-            "time_list": ["21:00", "01:00", "07:00", "9:45"]
+            "time_list": ["21:00", "01:00", "07:00", "09:45"]
         },
         {
             "name": "NynganSE-Australia",
@@ -77,7 +77,7 @@
             "name": "Guaruja-Brazil",
             "url": "https://www.centraldotempo.com.br/data/robot/robot3/robot3.jpg",
             "crop_coords": "(0,0,1280,650)",
-            "time_list": ["11:00", "13:00", "16:00", "21:30"]
+            "time_list": ["11:00", "13:00", "16:00", "21:15"]
         },
         {
             "name": "Guadalajara-Mexico",
