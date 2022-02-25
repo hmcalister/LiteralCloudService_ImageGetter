@@ -372,7 +372,7 @@ def wget_sources():
             else:
                 logging.info("GET FAILED")
             logging.info("-"*80)
-        logging.info("GOT ALL SOURCES SUCCESSFULLY")
+        logging.info("ALL SOURCES GET FINISHED")
         logging.info("-"*80)
     except KeyboardInterrupt:
         logging.info("*"*80)
