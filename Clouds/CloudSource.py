@@ -352,27 +352,33 @@ def wget_sources():
     logging.info("-"*80)
 
     logging.info("START GET FROM SOURCES")
-    for source in cloud_sources:
-        logging.info(f"{source=}")
-        logging.info(f"CURRENT TIME (LOCAL): {datetime.datetime.now()}")
-        logging.info(f"CURRENT TIME (UTC): {datetime.datetime.utcnow()}")
-        now = datetime.datetime.utcnow()
-        delta = source.target_time - now
-        if delta.total_seconds() > 0:
-            logging.info(f"SLEEPING FOR {delta.total_seconds()}s")
-            logging.info(f"SLEEP FINISH SCHEDULED FOR (LOCAL): {datetime.datetime.now()+delta}")
-            logging.info(f"SLEEP FINISH SCHEDULED FOR (UTC): {datetime.datetime.utcnow()+delta}")
-            time.sleep(delta.total_seconds())
-        else:
-            logging.info(f"NO SLEEP NEEDED")
-        logging.info(f"GET {str(source)}")
-        if source.get_image():
-            logging.info("GET SUCCESSFUL")
-        else:
-            logging.info("GET FAILED")
+    try:
+        for source in cloud_sources:
+            logging.info(f"{source=}")
+            logging.info(f"CURRENT TIME (LOCAL): {datetime.datetime.now()}")
+            logging.info(f"CURRENT TIME (UTC): {datetime.datetime.utcnow()}")
+            now = datetime.datetime.utcnow()
+            delta = source.target_time - now
+            if delta.total_seconds() > 0:
+                logging.info(f"SLEEPING FOR {delta.total_seconds()}s")
+                logging.info(f"SLEEP FINISH SCHEDULED FOR (LOCAL): {datetime.datetime.now()+delta}")
+                logging.info(f"SLEEP FINISH SCHEDULED FOR (UTC): {datetime.datetime.utcnow()+delta}")
+                time.sleep(delta.total_seconds())
+            else:
+                logging.info(f"NO SLEEP NEEDED")
+            logging.info(f"GET {str(source)}")
+            if source.get_image():
+                logging.info("GET SUCCESSFUL")
+            else:
+                logging.info("GET FAILED")
+            logging.info("-"*80)
+        logging.info("GOT ALL SOURCES SUCCESSFULLY")
         logging.info("-"*80)
-    logging.info("GOT ALL SOURCES SUCCESSFULLY")
-    logging.info("-"*80)
+    except KeyboardInterrupt:
+        logging.info("*"*80)
+        logging.info("KEYBOARD INTERRUPT")
+        logging.info("ARCHIVE CURRENT IMAGES")
+        logging.info("*"*80)
     logging.info("MOVE IMAGES TO BACKUP FOLDER")
     archive_images()
     logging.info("-"*80)
