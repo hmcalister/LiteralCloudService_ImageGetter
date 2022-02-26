@@ -47,7 +47,6 @@ class Receiver:
     random_message: bool
     attach_original_name: bool
 
-
 def send_email(receiver_address:str, subject:str, body:str, image = None, server:smtplib.SMTP_SSL=SMTP_SERVER):
     """
     Send an email to the receiver address, handelling all the backend MIME interactions
