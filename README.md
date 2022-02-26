@@ -27,10 +27,10 @@ Under the `Clouds` directory you can find the scripts used to get images from we
 
 Webcam data was collected from various internet sites that offer free and open webcams. These sources are compiled into `Clouds/CloudSourcesData.json` file, which also hold information on the time of day to get images and the crop coordinates (the dimensions to crop the source image to, mainly to remove any watermarks or bars from the webcams). These were all found manually, and should be self explanatory enough to expand on in future if needed.
 
-In order to expand this data later, a version number has been attached to the data. This version number can control the format of the data in future. Currently only version number 1 is defined:
+In order to expand this data later, a version number has been attached to the data. This version number can control the format of the data in future. Versions should be backwards compatible. Version 2.0 is defined below:
 
 ```
-CloudSourcesData.json - Version: 1
+CloudSourcesData.json - Version: 2
 {
     "Version": 1,
     "CloudSources": [
@@ -38,7 +38,8 @@ CloudSourcesData.json - Version: 1
             "name": String,
             "url": String,
             "crop_coords": String,
-            "time_list": [String]
+            "time_list": [String],
+            "time_interval": [String]
         },
         ...
     ]
@@ -51,6 +52,13 @@ Where :
 - `url` is the publicly accessible url to `wget` to get an image from
 - `crop_coords` is a string of the form `(a,b,c,d)` where a,b,c,d are integers that define the crop. This four-tuple is used directly by PIL.Image.crop, so ensure this form is met
 - `time_list` is a list of strings, each string of the form "HH:MM" where HH is the hour in 24 hour time, and MM is the minutes, such that "HH:MM" form the 24 time to `wget` the source. This should be changed to account for the seasons changing sunrise and sunset times. Currently these are all relative to UTC, not system time.
+- `time_interval` is a list of three strings exactly. The first string is the start time (defined exactly like the `time_list` string), which is the first time (inclusive) that the source is queried. The second string is the interval, which is added to the start time to get each time to get a new time. The third string is the end time (defined the same as the start time), which is the final time (inclusive) which terminates the source querying. For example, 
+    
+    `time_interval`: ["12:00", "01:30", "00:30"] 
+    
+    is equivalent to 
+
+    `time_list`: ["12:00", "13:30", "15:00", "16:30", "18:00", "19:30", "21:00", "22:30", "00:00", "00:30"]
 
 ### CloudSource.py
 

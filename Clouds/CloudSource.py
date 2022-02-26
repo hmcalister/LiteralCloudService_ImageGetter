@@ -208,6 +208,9 @@ class CloudSource:
 def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> List[CloudSource]:
     """
     Get all cloud sources specified in a data file.
+    Currently supports version 2.0 of the CloudSourcesData.json
+
+    See the readme for more details.
 
     ---
 
@@ -236,9 +239,33 @@ def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> 
         name = cloud_source_data["name"]
         url = cloud_source_data["url"]
         crop_coords = cloud_source_data["crop_coords"]
-        for time in cloud_source_data["time_list"]:
+        if "time_list" in cloud_source_data:
+            for time in cloud_source_data["time_list"]:
+                logging.info(f"{name}, {url}, {crop_coords}, {time}")
+                cloud_source = CloudSource(name, url, literal_eval(crop_coords), time)
+                logging.debug(cloud_source)
+                cloud_sources.append(cloud_source)
+        elif "time_interval" in cloud_source_data:
+            start_time, interval, end_time = cloud_source_data["time_interval"]
+            start_time = datetime.datetime.strptime(start_time, "%H:%M")
+            end_time = datetime.datetime.strptime(end_time, "%H:%M")
+            # Ensure endtime is after start time
+            if start_time>end_time:
+                end_time+=datetime.timedelta(days=1)
+            hour = int(interval.split(":")[0])
+            minute = int(interval.split(":")[1])
+            interval = datetime.timedelta(hours=hour, minutes=minute)
+            time = start_time
+            while time<end_time:
+                logging.info(f"{name}, {url}, {crop_coords}, {time}")
+                cloud_source = CloudSource(name, url, literal_eval(crop_coords), time.strftime("%H:%M"))
+                logging.debug(cloud_source)
+                cloud_sources.append(cloud_source)
+                time += interval
+            # Finally, add end time
+            time = end_time
             logging.info(f"{name}, {url}, {crop_coords}, {time}")
-            cloud_source = CloudSource(name, url, literal_eval(crop_coords), time)
+            cloud_source = CloudSource(name, url, literal_eval(crop_coords), time.strftime("%H:%M"))
             logging.debug(cloud_source)
             cloud_sources.append(cloud_source)
 
