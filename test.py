@@ -19,3 +19,6 @@ def get(url):
 def crop(im, coords):
     im=im.crop(coords)
     im.show()
+
+def remove():
+    os.remove("cloud.png")
