@@ -250,7 +250,7 @@ def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> 
             start_time = datetime.datetime.strptime(start_time, "%H:%M")
             end_time = datetime.datetime.strptime(end_time, "%H:%M")
             # Ensure endtime is after start time
-            if start_time>end_time:
+            if start_time>=end_time:
                 end_time+=datetime.timedelta(days=1)
             hour = int(interval.split(":")[0])
             minute = int(interval.split(":")[1])
@@ -335,7 +335,7 @@ def archive_images(backup_dir=None, current_dir="images/current_downloads"):
         backup_dir=f"images/images_archive/{datetime.datetime.utcnow().date()}"
 
     try:
-        os.makedirs(backup_dir)
+        os.makedirs(backup_dir, exist_ok=True)
         for file_name in os.listdir(current_dir):
             shutil.move(os.path.join(current_dir, file_name), backup_dir)
     except Exception as e:

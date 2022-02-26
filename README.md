@@ -52,7 +52,9 @@ Where :
 - `url` is the publicly accessible url to `wget` to get an image from
 - `crop_coords` is a string of the form `(a,b,c,d)` where a,b,c,d are integers that define the crop. This four-tuple is used directly by PIL.Image.crop, so ensure this form is met
 - `time_list` is a list of strings, each string of the form "HH:MM" where HH is the hour in 24 hour time, and MM is the minutes, such that "HH:MM" form the 24 time to `wget` the source. This should be changed to account for the seasons changing sunrise and sunset times. Currently these are all relative to UTC, not system time.
-- `time_interval` is a list of three strings exactly. The first string is the start time (defined exactly like the `time_list` string), which is the first time (inclusive) that the source is queried. The second string is the interval, which is added to the start time to get each time to get a new time. The third string is the end time (defined the same as the start time), which is the final time (inclusive) which terminates the source querying. For example, 
+- `time_interval` is a list of three strings exactly. The first string is the start time (defined exactly like the `time_list` string), which is the first time (inclusive) that the source is queried. The second string is the interval, which is added to the start time to get each time to get a new time. The third string is the end time (defined the same as the start time), which is the final time (inclusive) which terminates the source querying. If the end time is before the start time (or if they are the same) then the end time is assumed to be one day ahead of the start time (i.e. it is assumed the source should be queried at least once). 
+    
+    For example, 
     
     `time_interval`: ["12:00", "01:30", "00:30"] 
     
