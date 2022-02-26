@@ -59,6 +59,9 @@ try:
         logging.info(f"GET {str(source)}")
         if source.get_image():
             logging.info("GET SUCCESSFUL")
+            logging.info("MOVE IMAGE TO ARCHIVE FOLDER")
+            CloudSource.archive_images()
+            logging.info("IMAGE MOVED SUCCESSFULLY")
         else:
             logging.info("GET FAILED")
         logging.info("-"*80)
@@ -67,8 +70,8 @@ try:
 except KeyboardInterrupt:
     logging.info("*"*80)
     logging.info("KEYBOARD INTERRUPT")
-    logging.info("ARCHIVE CURRENT IMAGES")
     logging.info("*"*80)
-logging.info("MOVE IMAGES TO BACKUP FOLDER")
+
+logging.info("MOVE REMAINING IMAGES TO ARCHIVE FOLDER")
 CloudSource.archive_images()
 logging.info("-"*80)
