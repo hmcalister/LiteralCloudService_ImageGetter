@@ -38,6 +38,8 @@ for source in cloud_sources:
     logging.info(f"{str(source):<50}{source.target_time}")
 
 logging.info("-"*80)
+logging.info(f"TOTAL OF {len(cloud_sources)} SOURCES")
+logging.info("-"*80)
 
 logging.info("START GET FROM SOURCES")
 try:
