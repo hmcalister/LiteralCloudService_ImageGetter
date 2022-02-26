@@ -3,7 +3,7 @@ from PIL import Image
 import datetime
 import os
 
-cloud_source_name = "AliceSprings-Australia"
+cloud_source_name = "Hobart-Australia"
 image_root_dir = "images/images_archive"
 save_dir = "images/gifs"
 
@@ -50,5 +50,5 @@ def process_directory(directory:str, target_substring:str, recurse:bool=True) ->
 x=process_directory(image_root_dir, cloud_source_name)
 imgs = (Image.open(f) for f in x)
 img = next(imgs)
-img.save(fp=os.path.join(save_dir, f"{datetime.datetime.utcnow().date()} {cloud_source_name}.gif"),
+img.save(fp=os.path.join(save_dir, f"{cloud_source_name}.gif"),
     format="GIF", append_images=imgs, save_all=True, duration=100, loop=0)
