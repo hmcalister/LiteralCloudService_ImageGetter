@@ -5,13 +5,13 @@
             "name": "Hobart-Australia",
             "url": "https://hccapps.hobartcity.com.au/webcams/platform",
             "crop_coords": "(0,250,3250,1500)",
-            "time_interval": ["19:30", "01:00", "09:30"]
+            "time_interval": ["00:00", "00:15", "00:00"]
         },
         {
             "name": "Bauang-Philippines",
             "url": "https://admin.meteobridge.com/cam/57287b66aef052a0bb33df9e62f6ff05/camplus.jpg",
             "crop_coords": "(0,50,999,500)",
-            "time_interval": ["22:30", "01:00", "10:00"]
+            "time_interval": ["22:30", "00:45", "10:00"]
         },
         {
             "name": "Stavrakia-Crete",
@@ -65,13 +65,13 @@
             "name": "Geraldton-Australia",
             "url": "https://mywebcams.com.au/WA/Geraldton.php",
             "crop_coords": "(0,50,1920,900)",
-            "time_list": ["22:00", "02:00", "06:00", "11:00"]
+            "time_interval": ["22:00", "0:30", "11:00"]
         },
         {
             "name": "Alexandra-NZ",
             "url": "https://myairportcams.com/Alexandra/current3.jpg",
             "crop_coords": "(0,100,2560,1920)",
-            "time_interval": ["18:30", "00:30", "08:00"]
+            "time_interval": ["18:30", "00:15", "08:00"]
         },
         {
             "name": "Guaruja-Brazil",
@@ -83,7 +83,7 @@
             "name": "Guadalajara-Mexico",
             "url": "http://www.webcamsdemexico.net/guadalajara1/live.jpg",
             "crop_coords": "(0,60,800,600)",
-            "time_list": ["13:30", "16:30", "21:30", "00:30"]
+            "time_interval": ["13:30", "0:45", "00:30"]
         },
         {
             "name": "RevolutionMonument-Mexico",
@@ -159,8 +159,8 @@
         },
         {
             "name": "HampsteadHeath-UK",
-            "url": "http://nw3weather.co.uk/skycam_small.jpg",
-            "crop_coords": "(0,0,864,550)",
+            "url": "http://nw3weather.co.uk/skycam.jpg",
+            "crop_coords": "(0,0,1980,1250)",
             "time_list": ["07:00", "10:30", "13:30", "17:30"]
         },
         {
@@ -185,7 +185,7 @@
             "name": "ChimneySouthTaranaki-NZ",
             "url": "https://primo.nz/webcameras/snapshot_chimney_sth.jpg",
             "crop_coords": "(0,200,3840,2160)",
-            "time_interval": ["18:00", "01:00", "07:30"]
+            "time_interval": ["00:00", "00:30", "00:00"]
         },
         {
             "name": "BridgemanTaranaki-NZ",
