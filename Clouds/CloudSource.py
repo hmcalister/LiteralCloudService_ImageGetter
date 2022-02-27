@@ -1,12 +1,11 @@
 import datetime
-import time
+import shutil
 import urllib
 import logging
 import wget
 import json
 import os
 import ssl
-import shutil
 from ast import literal_eval
 from typing import List, Tuple
 from urllib.error import ContentTooShortError
@@ -307,7 +306,7 @@ def delete_file(file_path:str)->bool:
         logging.debug(f"{file_path} DOES NOT EXIST! REMOVAL NOT NEEDED")
         return True
 
-def archive_images(backup_dir=None, current_dir="images/current_downloads"):
+def archive_images(backup_dir=None, current_dir="images/current_downloads") -> bool:
     """
     Moves the images directory to a backup directory.
 
@@ -325,6 +324,12 @@ def archive_images(backup_dir=None, current_dir="images/current_downloads"):
 
     current_dir : str (optional, defaults to "images/current_downloads")
         The directory in which the images to archive currently reside
+
+    ---
+
+    Returns : Bool
+        True if images were moved correctly, False otherwise
+
     """
     
     if backup_dir==None:
@@ -332,9 +337,18 @@ def archive_images(backup_dir=None, current_dir="images/current_downloads"):
 
     try:
         os.makedirs(backup_dir, exist_ok=True)
-        for file_name in os.listdir(current_dir):
-            shutil.move(os.path.join(current_dir, file_name), backup_dir)
     except Exception as e:
-        logging.info("ERROR: Failed to move images to backup folder!")
-        logging.debug(f"{e=}")
-        logging.debug(f"{type(e)=}")
+        logging.info("ERROR: Failed to create backup folder!")
+        logging.info(f"{e=}")
+        logging.info(f"{type(e)=}")
+        return False
+    for file_name in os.listdir(current_dir):
+        try:
+            shutil.move(os.path.join(current_dir, file_name), os.path.join(backup_dir, file_name))
+        except Exception as e:
+            logging.info(f"ERROR: Failed to move {file_name} to backup folder!")
+            logging.info(f"{e=}")
+            logging.info(f"{type(e)=}")
+            continue
+
+    return True
