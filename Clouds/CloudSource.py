@@ -262,10 +262,6 @@ def get_cloud_sources(clouds_data_file:str = "Clouds/CloudSourcesData.json") -> 
                 logging.debug(cloud_source)
                 cloud_sources.append(cloud_source)
                 time += interval
-            # Finally, add end time
-            time = end_time
-            logging.info(f"{name}, {url}, {crop_coords}, {time}")
-            cloud_source = CloudSource(name, url, literal_eval(crop_coords), time.strftime("%H:%M"))
             logging.debug(cloud_source)
             cloud_sources.append(cloud_source)
 
