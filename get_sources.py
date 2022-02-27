@@ -60,8 +60,8 @@ try:
         if source.get_image():
             logging.info("GET SUCCESSFUL")
             logging.info("MOVE IMAGE TO ARCHIVE FOLDER")
-            CloudSource.archive_images()
-            logging.info("IMAGE MOVED SUCCESSFULLY")
+            if CloudSource.archive_images():
+                logging.info("IMAGE MOVED SUCCESSFULLY")
         else:
             logging.info("GET FAILED")
         logging.info("-"*80)
