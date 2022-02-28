@@ -10,5 +10,5 @@ The directory to hold all images, sorted into subdirectories by date. Images are
 ## `email_images`
 A directory to hold all of the images that can be emailed out. Images here are selected at random once per day, emailed, then deleted. A warning is sent to the admin if this folder is nearly empty. If empty, no email is sent and the email script crashes.
 
-## `gifs`
-Used as the default folder to save gifs to when using the `make_gifs.py` script in the root directory of this repo. Gifs generated are saved here
+## `Videos`
+Used as the default folder to save videos to when using the `make_video.py` script in the root directory of this repo. Videos generated are saved here
