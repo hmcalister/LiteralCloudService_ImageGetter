@@ -310,7 +310,7 @@ def archive_images(backup_dir=None, current_dir="images/current_downloads") -> b
     """
     Moves the images directory to a backup directory.
 
-    Intended to be run after collecting from all sources processing.
+    Intended to be run after collecting from sources. Also removes any .tmp files (failed downloads)
 
     In future may add option for compression as well.
 
@@ -344,7 +344,10 @@ def archive_images(backup_dir=None, current_dir="images/current_downloads") -> b
         return False
     for file_name in os.listdir(current_dir):
         try:
-            shutil.move(os.path.join(current_dir, file_name), os.path.join(backup_dir, file_name))
+            if file_name.endswith(".tmp"):
+                delete_file(os.path.join(current_dir, file_name))
+            else:
+                shutil.move(os.path.join(current_dir, file_name), os.path.join(backup_dir, file_name))
         except Exception as e:
             logging.info(f"ERROR: Failed to move {file_name} to backup folder!")
             logging.info(f"{e=}")
