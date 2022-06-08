@@ -9,6 +9,8 @@ Ethical use of this project includes getting consent from receivers before addin
 
 This project uses the `smtplib` python library to send emails, meaning an email account must already be set up. Currently, I have a gmail account set up to email clouds, so the smtp server is set to the gmail web server. More information can be found below. 
 
+WARNING: If you plan to use a Gmail account with `smtp.gmail.com` as your SMTP server, you will need to use an app password for this script to work. Unfortunately, Google has altered their security policy to make this slightly more annoying, but the clouds still remain!
+
 ---
 
 ## Running this project

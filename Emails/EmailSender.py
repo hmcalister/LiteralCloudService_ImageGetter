@@ -27,7 +27,7 @@ def get_sender_login(data_json = "emails/login_data.json"):
     email_data = json.load(email_data_file)
     email_data_file.close() 
     sender_email = email_data["sender_address"]
-    password = email_data["email_password"]
+    password = email_data["app_password"]
     return sender_email, password
 
 server_address = "smtp.gmail.com"
