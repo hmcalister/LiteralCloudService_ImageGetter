@@ -4,3 +4,4 @@ images_backup/*
 emails/email_list.*
 *.key
 *.pub
+*.pem

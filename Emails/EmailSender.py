@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
 
-def get_sender_login(data_json = "emails/login_data.json"):
+def get_sender_login(data_json = "Emails/login_data.json"):
     """
     Get the login details for the sender email account
 
