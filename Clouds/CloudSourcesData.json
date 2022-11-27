@@ -204,6 +204,12 @@
             "url": "https://www.primo.nz/webcameras/snapshot_mangawhero.jpg",
             "crop_coords": "(0,100,1920,1080)",
             "time_list": ["17:30", "22:00", "04:00", "05:30"]
+        },
+        {
+            "name": "Dunedin-NZ",
+            "url": "https://www.physics.otago.ac.nz/eman/weather_station/weather_data/lemcam4.jpg",
+            "crop_coords": "(0,0,1200,880)",
+            "time_list": ["17:30", "22:00", "04:00", "05:30"]
         }
     ]    
 }
