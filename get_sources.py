@@ -1,4 +1,5 @@
-import logging, datetime, time
+import logging, datetime, time, json
+import numpy as np
 
 logging.Formatter.converter = time.gmtime
 logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-cloud-sources.log", 
@@ -7,6 +8,30 @@ logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-clo
     datefmt='%Y-%m-%d %H:%M:%S')
 
 from Clouds import CloudSource
+
+NUM_IMAGES = 12
+
+ONE_DAY = 24*60*60
+ONE_HOUR = 60*60
+NUM_IMAGES = 48
+BASE_IMAGE_TIMES = np.linspace(0, ONE_DAY, NUM_IMAGES)
+
+logging.info("-"*80)
+logging.info("*"*80)
+logging.info(f"RECREATE SOURCE TIMES")
+logging.info("*"*80)
+logging.info("-"*80)
+
+with open("Clouds/CloudSourcesData.json", "r") as f:
+    cloudSourcesJSON = json.load(f)
+    for source in cloudSourcesJSON["CloudSources"]:
+        randomOffsets = np.random.uniform(size=(NUM_IMAGES, )) * ONE_HOUR
+        sourceImageTimes = BASE_IMAGE_TIMES + randomOffsets
+        imageTimesUTC = [datetime.datetime.utcfromtimestamp(t).strftime("%H:%M") for t in sourceImageTimes]
+        source["time_list"] = imageTimesUTC
+
+with open("Clouds/CloudSourcesData.json", "w") as f:
+    json.dump(cloudSourcesJSON, f)
 
 logging.info("-"*80)
 logging.info("*"*80)
@@ -20,16 +45,6 @@ cloud_sources = CloudSource.get_cloud_sources()
 logging.info("LOAD SUCCESSFUL")
 logging.debug(cloud_sources)
 logging.info("-"*80)
-
-# logging.info("GET TARGET TIMES")
-# for source in cloud_sources:
-#     now = datetime.datetime.utcnow()
-#     logging.debug(f"{now=}")
-#     logging.debug(f"{source=}")
-#     source.set_target_time(now)
-
-# logging.info("TARGET TIMES CREATED")
-# logging.info("-"*80)
 
 logging.info("SORTING SOURCES")
 cloud_sources.sort(key = lambda x:x.target_time)
