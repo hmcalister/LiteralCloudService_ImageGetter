@@ -77,21 +77,20 @@ class CloudSource:
 
         return f"CloudSource: {self.name}, URL: {self.url}, crop_coords: {self.crop_coords}, Time: {self.time}"
 
-    def get_image(self, image_name:str = None, directory:str="images/current_downloads") -> bool:
+    def get_image(self, download_root_directory: str = "images/archive") -> bool:
         """
         Get the most recent image from this cloud source, crop it, and save it
 
         ---
 
-        Params:
+        Params
 
-        image_name : str or None (optional, defaults to None)
-            The name to save this image under. If left None, the default name is used.
-            The default name is date + self.name 
-
-        directory : str (optional, defaults to "images/current_downloads")
-            The directory to save the download to
-
+        download_root_directory: str
+            The root directory for the download. Images are downloaded and saved to
+            a directory within this root directory with this sources name. E.g.
+            A CloudSource with the name "SourceXYZ" will be downloaded to
+            "images/archive/SourceXYZ/image.png"
+        
         ---
 
         Returns : bool
@@ -99,9 +98,12 @@ class CloudSource:
         """
 
         try:
+            logging.debug(f"ENSURING CREATION OF DIRECTORY {os.path.join(download_root_directory, self.name)}")
+            targetDir = os.path.join(download_root_directory, self.name)
+            image_name = os.path.join(targetDir, f"{str(self)}.png")
+            os.makedirs(targetDir)
+
             logging.info(f"STARTING {self.name} DOWNLOAD")
-            if image_name == None:
-                image_name = os.path.join(directory, f"{str(self)}.png")
 
             logging.debug(f"{image_name=}")
             logging.debug(f"{self.url=}")
