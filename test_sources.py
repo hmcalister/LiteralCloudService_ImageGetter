@@ -73,7 +73,7 @@ for name, url in CLOUD_SOURCE_URLS.items():
     logging.info("-"*80)
     source = CloudSource.CloudSource(name, url, None, "00:00")
     logging.info(f"TESTING SOURCE {source.name} STARTED")
-    if source.get_image(download_root_directory="images/test_images"):
+    if source.get_image(download_root_directory=IMAGE_ROOT_DIRECTORY):
         logging.info("GET SUCCESSFUL")
     else:
         logging.info("GET FAILED")
