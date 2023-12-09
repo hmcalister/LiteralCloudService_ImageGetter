@@ -37,7 +37,7 @@ class CloudSource:
 
         coords : Tuple[int, int, int, int]
             The coordinates to crop the image from in form of (left, top, right, bottom)
-            To be used with PIL crop function
+            To be used with PIL crop function. If None then no cropping is performed
 
         time : str
             A time (in 24 hour format) to get the image from the url (since we want to avoid night)
@@ -133,46 +133,47 @@ class CloudSource:
             logging.debug(f"{type(e)=}")
             return False
 
-        try:
-            im, cropped_im = None, None
-            logging.info("CROPPING IMAGE")
-            logging.debug(f"Opening {image_name} with PIL")
-            im = Image.open(image_name)
-            logging.debug(f"Source Dimensions: {im.size}")
-            logging.debug(f"Target Dimensions: {self.crop_coords=}")
-            cropped_im = im.crop(self.crop_coords)
-            logging.debug("Image cropped, saving image...")
-            cropped_im.save(image_name)
-            im.close()
-            cropped_im.close()
-            logging.info("IMAGE SAVED")
-        except UnidentifiedImageError as e: 
-            logging.info(f"ERROR: Unidentified image from source {self.name}! URL may be broken")
-            delete_file(image_name)
-            logging.debug(f"{e=}")
-            logging.debug(f"{type(e)=}")
-            return False
-        except FileNotFoundError as e:
-            logging.info(f"ERROR: File {self.name} not found! Download may have failed")
-            delete_file(image_name)
-            logging.debug(f"{e=}")
-            logging.debug(f"{type(e)=}")
-            return False
-        except SystemError as e:
-            logging.info(f"ERROR: System error during save of {self.name}! Check config and retry")
-            delete_file(image_name)
-            logging.debug(f"{e=}")
-            logging.debug(f"{type(e)=}")
-            return False
-        except Exception as e:
-            logging.info(f"ERROR: An unexpected error occurred during cropping of {self.name}! Check URL and retry")
-            # Handle the case where a download is unexpectedly cut off
-            if im is not None: im.close()
-            if cropped_im is not None: cropped_im.close()
-            delete_file(image_name)
-            logging.info(f"{e=}")
-            logging.info(f"{type(e)=}")
-            return False           
+        if self.crop_coords is not None:
+            try:
+                im, cropped_im = None, None
+                logging.info("CROPPING IMAGE")
+                logging.debug(f"Opening {image_name} with PIL")
+                im = Image.open(image_name)
+                logging.debug(f"Source Dimensions: {im.size}")
+                logging.debug(f"Target Dimensions: {self.crop_coords=}")
+                cropped_im = im.crop(self.crop_coords)
+                logging.debug("Image cropped, saving image...")
+                cropped_im.save(image_name)
+                im.close()
+                cropped_im.close()
+                logging.info("IMAGE SAVED")
+            except UnidentifiedImageError as e: 
+                logging.info(f"ERROR: Unidentified image from source {self.name}! URL may be broken")
+                delete_file(image_name)
+                logging.debug(f"{e=}")
+                logging.debug(f"{type(e)=}")
+                return False
+            except FileNotFoundError as e:
+                logging.info(f"ERROR: File {self.name} not found! Download may have failed")
+                delete_file(image_name)
+                logging.debug(f"{e=}")
+                logging.debug(f"{type(e)=}")
+                return False
+            except SystemError as e:
+                logging.info(f"ERROR: System error during save of {self.name}! Check config and retry")
+                delete_file(image_name)
+                logging.debug(f"{e=}")
+                logging.debug(f"{type(e)=}")
+                return False
+            except Exception as e:
+                logging.info(f"ERROR: An unexpected error occurred during cropping of {self.name}! Check URL and retry")
+                # Handle the case where a download is unexpectedly cut off
+                if im is not None: im.close()
+                if cropped_im is not None: cropped_im.close()
+                delete_file(image_name)
+                logging.info(f"{e=}")
+                logging.info(f"{type(e)=}")
+                return False           
         return True
 
     def set_target_time(self, now:datetime.datetime) -> datetime.datetime:
