@@ -7,6 +7,8 @@ logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-clo
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
 
+
+
 from Clouds import CloudSource
 
 NUM_IMAGES = 12
