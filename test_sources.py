@@ -1,4 +1,5 @@
 import logging, datetime, time, json
+import os, shutil
 from ast import literal_eval
 from Clouds import CloudSource
 logging.Formatter.converter = time.gmtime
@@ -6,6 +7,16 @@ logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-clo
     format='%(asctime)s %(levelname)-8s %(message)s',
     level=logging.INFO,
     datefmt='%Y-%m-%d %H:%M:%S')
+
+IMAGE_ROOT_DIRECTORY = "images/test_images"
+
+# Remove all old test images
+for item in os.listdir(IMAGE_ROOT_DIRECTORY):
+    targetPath = os.path.join(IMAGE_ROOT_DIRECTORY, item)
+    if os.path.isdir(targetPath):
+        shutil.rmtree(targetPath)
+    else:
+        os.remove(targetPath)
 
 logging.info("-"*80)
 logging.info("*"*80)
