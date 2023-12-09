@@ -80,3 +80,9 @@ for name, url in CLOUD_SOURCE_URLS.items():
     logging.info("-"*80)
 
 
+# Move all images to root directory for ease of navigation (rather than separate directory for each source)
+for directory in os.listdir(IMAGE_ROOT_DIRECTORY):
+    targetDir = os.path.join(IMAGE_ROOT_DIRECTORY, directory)
+    for image in os.listdir(os.path.join(IMAGE_ROOT_DIRECTORY, directory)):
+        shutil.move(os.path.join(targetDir, image), os.path.join(IMAGE_ROOT_DIRECTORY, image))
+    shutil.rmtree(targetDir)
