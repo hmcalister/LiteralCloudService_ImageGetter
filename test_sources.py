@@ -35,7 +35,7 @@ logging.info("-"*80)
 #     logging.info("-"*80)
 #     source = CloudSource.CloudSource(sourceJSON["name"], sourceJSON["url"], literal_eval(sourceJSON["crop_coords"]), "00:00")
 #     logging.info(f"TESTING SOURCE {source.name} STARTED")
-#     if source.get_image(directory="images/test_images"):
+#     if source.get_image(directory=IMAGE_ROOT_DIRECTORY):
 #         logging.info("GET SUCCESSFUL")
 #     else:
 #         logging.info("GET FAILED")
