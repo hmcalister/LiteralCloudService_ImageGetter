@@ -32,14 +32,15 @@ logging.info("-"*80)
 
 # Map of names to urls to test
 CLOUD_SOURCE_URLS = {
-    
+    "BridgemanTaranaki-NZ": "https://www.primo.nz/webcameras/snapshot_bridgeman.jpg",
+    "TuahuTaranaki-NZ": "https://www.primo.nz/webcameras/snapshot_tuahu.jpg",
 }
 logging.info("TEST SOURCES")
 for name, url in CLOUD_SOURCE_URLS.items():
     logging.info("-"*80)
     source = CloudSource.CloudSource(name, url, None, "00:00")
     logging.info(f"TESTING SOURCE {source.name} STARTED")
-    if source.get_image(directory="images/test_images"):
+    if source.get_image(download_root_directory="images/test_images"):
         logging.info("GET SUCCESSFUL")
     else:
         logging.info("GET FAILED")
