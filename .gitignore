@@ -2,6 +2,7 @@ __pycache__
 images/*/*
 images_backup/*
 emails/email_list.*
+new_sources.json
 *.key
 *.pub
 *.pem
