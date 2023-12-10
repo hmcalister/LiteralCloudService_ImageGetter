@@ -77,7 +77,7 @@ class CloudSource:
 
         return f"CloudSource: {self.name}, URL: {self.url}, crop_coords: {self.crop_coords}, Time: {self.time}"
 
-    def get_image(self, download_root_directory: str = "images/archive") -> bool:
+    def get_image(self, download_root_directory: str = "images/archive", separate_by_source: bool = True) -> bool:
         """
         Get the most recent image from this cloud source, crop it, and save it
 
@@ -90,6 +90,10 @@ class CloudSource:
             a directory within this root directory with this sources name. E.g.
             A CloudSource with the name "SourceXYZ" will be downloaded to
             "images/archive/SourceXYZ/image.png"
+
+        separate_by_source: bool
+            Boolean to save images to a child directory of the root directory
+            If false, images are all saved to the same directory
         
         ---
 
@@ -99,9 +103,13 @@ class CloudSource:
 
         try:
             logging.debug(f"ENSURING CREATION OF DIRECTORY {os.path.join(download_root_directory, self.name)}")
-            targetDir = os.path.join(download_root_directory, self.name)
+            if separate_by_source:
+                targetDir = os.path.join(download_root_directory, self.name)
+            else:
+                targetDir = download_root_directory
+
             image_name = os.path.join(targetDir, f"{str(self)}.png")
-            os.makedirs(targetDir)
+            os.makedirs(targetDir, exist_ok=True)
 
             logging.info(f"STARTING {self.name} DOWNLOAD")
 
