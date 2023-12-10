@@ -10,14 +10,6 @@ logging.basicConfig(filename=f"logs/{str(datetime.datetime.utcnow().date())}-clo
 
 IMAGE_ROOT_DIRECTORY = "images/test_images"
 
-# Remove all old test images
-for item in os.listdir(IMAGE_ROOT_DIRECTORY):
-    targetPath = os.path.join(IMAGE_ROOT_DIRECTORY, item)
-    if os.path.isdir(targetPath):
-        shutil.rmtree(targetPath)
-    else:
-        os.remove(targetPath)
-
 logging.info("-"*80)
 logging.info("*"*80)
 logging.info(f"SCRIPT START AT LOCAL {datetime.datetime.now()}")
@@ -25,21 +17,13 @@ logging.info(f"SCRIPT START AT UTC {datetime.datetime.utcnow()}")
 logging.info("*"*80)
 logging.info("-"*80)
 
-# logging.info("LOAD SOURCES")
-# with open("Clouds/CloudSourcesData.json", "r") as f:
-#     cloudSourcesJSON = json.load(f)
-# logging.info("LOAD SUCCESSFUL")
-
-# logging.info("TEST SOURCES")
-# for sourceJSON in cloudSourcesJSON["CloudSources"]:
-#     logging.info("-"*80)
-#     source = CloudSource.CloudSource(sourceJSON["name"], sourceJSON["url"], literal_eval(sourceJSON["crop_coords"]), "00:00")
-#     logging.info(f"TESTING SOURCE {source.name} STARTED")
-#     if source.get_image(directory=IMAGE_ROOT_DIRECTORY):
-#         logging.info("GET SUCCESSFUL")
-#     else:
-#         logging.info("GET FAILED")
-#     logging.info("-"*80)
+# Remove all old test images
+for item in os.listdir(IMAGE_ROOT_DIRECTORY):
+    targetPath = os.path.join(IMAGE_ROOT_DIRECTORY, item)
+    if os.path.isdir(targetPath):
+        shutil.rmtree(targetPath)
+    else:
+        os.remove(targetPath)
 
 # Map of names to urls to test
 CLOUD_SOURCE_URLS = {
@@ -73,16 +57,8 @@ for name, url in CLOUD_SOURCE_URLS.items():
     logging.info("-"*80)
     source = CloudSource.CloudSource(name, url, None, "00:00")
     logging.info(f"TESTING SOURCE {source.name} STARTED")
-    if source.get_image(download_root_directory=IMAGE_ROOT_DIRECTORY):
+    if source.get_image(download_root_directory=IMAGE_ROOT_DIRECTORY, separate_by_source=False):
         logging.info("GET SUCCESSFUL")
     else:
         logging.info("GET FAILED")
     logging.info("-"*80)
-
-
-# Move all images to root directory for ease of navigation (rather than separate directory for each source)
-for directory in os.listdir(IMAGE_ROOT_DIRECTORY):
-    targetDir = os.path.join(IMAGE_ROOT_DIRECTORY, directory)
-    for image in os.listdir(os.path.join(IMAGE_ROOT_DIRECTORY, directory)):
-        shutil.move(os.path.join(targetDir, image), os.path.join(IMAGE_ROOT_DIRECTORY, image))
-    shutil.rmtree(targetDir)
